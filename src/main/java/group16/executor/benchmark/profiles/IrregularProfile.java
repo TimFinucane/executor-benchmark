@@ -25,9 +25,9 @@ public class IrregularProfile extends DynamicProfile {
      * @param tasks Total number of tasks to be submitted
      * @param task1Avg Average value for task size in first distribution
      * @param task1Sd Standard deviation for task size in first distribution
-     * @param task2Avg Average value for task size in second distribution
-     * @param task2Sd Standard deviation for task size in second distribution
-     * @param ratioOfTasks Ratio of tasks sizes from the first distribution that will be dispatched
+     * @param task2Avg Average value for task size in second distribution (Defaults to 10x avg. of first distribution)
+     * @param task2Sd Standard deviation for task size in second distribution (Defaults to 10x sd of first distribution)
+     * @param ratioOfTasks Ratio of tasks sizes from the first distribution that will be dispatched (defaults to 0.5)
      * @param over How many milliseconds to submit the above number of tasks over. Defaults to 0 millis (i.e. static)
      */
     public IrregularProfile(int tasks, int task1Avg, int task1Sd, int task2Avg,
@@ -39,6 +39,19 @@ public class IrregularProfile extends DynamicProfile {
         this.task2Sd = task2Sd;
         this.ratioOfTasks = ratioOfTasks;
         this.over = over;
+    }
+
+    public IrregularProfile(int tasks, int task1Avg, int task1Sd) {
+        this(tasks, task1Avg, task1Sd, 10* task1Avg, 10* task1Sd, 0.5, 0);
+    }
+
+    public IrregularProfile(int tasks, int task1Avg, int task1Sd, int over) {
+        this(tasks, task1Avg, task1Sd, 10* task1Avg, 10* task1Sd, 0.5, over);
+    }
+
+    public IrregularProfile(int tasks, int task1Avg, int task1Sd, int task2Avg,
+                            int task2Sd, double ratioOfTasks) {
+        this(tasks, task1Avg, task1Sd, task2Avg, task2Sd, ratioOfTasks, 0);
     }
 
     @Override
