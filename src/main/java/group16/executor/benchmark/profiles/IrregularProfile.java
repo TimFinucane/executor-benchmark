@@ -3,17 +3,17 @@ package group16.executor.benchmark.profiles;
 import group16.executor.benchmark.DynamicDispatcher;
 import group16.executor.benchmark.Profile;
 import group16.executor.benchmark.ProfileBuilder;
+import group16.executor.benchmark.customDistributions.BimodalDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
-import org.apache.commons.math3.distribution.UniformRealDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 
 /**
  * This profile submits a number of halting (computational) tasks of varying size according to some variance, and over
- * some time period according to some timing variance. The distribution of task size will be a uniform distribution.
+ * some time period according to some timing variance. The distribution of task size will be a bimodal distribution,
+ * simulating a set of tasks with variance in order of magnitude.
  */
 public class IrregularProfile extends Profile {
 
@@ -21,30 +21,45 @@ public class IrregularProfile extends Profile {
 
     private DynamicDispatcher dynamicDispatcher;
     private final int tasks;
-    private final int taskSizeMin;
-    private final int taskSizeMax;
+    private final int task1Avg;
+    private final int task1Sd;
+    private final int task2Avg;
+    private final int task2Sd;
+    private final double ratioOfTasks;
     private final int over;
 
     /**
+     *
+     * @param dynamicDispatcher
      * @param tasks Total number of tasks to be submitted
-     * @param taskSizeMax maximum size of tasks generated. Generally recommend 10000 - 1000000.
-     * @param taskSizeMin minimum size of tasks generated. Generally recommend 10000 - 1000000.
+     * @param task1Avg
+     * @param task1Sd
+     * @param task2Avg
+     * @param task2Sd
+     * @param ratioOfTasks
      * @param over How many milliseconds to submit the above number of tasks over. Defaults to 0 millis (i.e. static)
      */
-    public IrregularProfile(DynamicDispatcher dynamicDispatcher, int tasks, int taskSizeMin, int taskSizeMax, int over) {
+    public IrregularProfile(DynamicDispatcher dynamicDispatcher, int tasks, int task1Avg, int task1Sd, int task2Avg,
+                            int task2Sd, double ratioOfTasks, int over) {
         this.dynamicDispatcher = dynamicDispatcher;
         this.tasks = tasks;
-        this.taskSizeMin = taskSizeMin;
-        this.taskSizeMax = taskSizeMax;
+        this.task1Avg = task1Avg;
+        this.task1Sd = task1Sd;
+        this.task2Avg = task2Avg;
+        this.task2Sd = task2Sd;
+        this.ratioOfTasks = ratioOfTasks;
         this.over = over;
     }
 
     @Override
     protected void run(ExecutorService service, ProfileBuilder builder) {
-        UniformRealDistribution randomTaskSize = new UniformRealDistribution(
+        BimodalDistribution randomTaskSize = new BimodalDistribution(
                 builder.getRandom(),
-                taskSizeMin,
-                taskSizeMax);
+                task1Avg,
+                task1Sd,
+                task2Avg,
+                task2Sd,
+                ratioOfTasks);
 
         if (over == 0) { // Static
             for (int i = 0; i < tasks; i++) {
