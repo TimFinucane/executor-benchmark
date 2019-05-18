@@ -53,6 +53,13 @@ public class IrregularProfile extends Profile {
         } else {
             double averageTimeSlice = (double)over / (double)tasks;
             double[] dispatchTimes = divideIntoRandomlySizedNumbers(averageTimeSlice, tasks, builder.getRandom());
+            int accuracy = (int)Math.round(randomTaskSize.sample());
+            for (int i = 0; i < tasks; i++) {
+                dynamicDispatcher.dynamicallyDispatch(
+                        builder.calculatorTask(accuracy),
+                        dispatchTimes[i]);
+            }
+            dynamicDispatcher.begin(service);
         }
     }
 
