@@ -15,7 +15,7 @@ public class UniformProfile extends Profile {
      *
      * @param taskSize - Size of task. Generally recommend 10000 - 1000000. Will submit +-20% of this amount
      * @param tasks - Number of tasks
-     * @param over - How many seconds to submit the above number of tasks over. Defaults to 0 seconds (i.e. static)
+     * @param over - How many milliseconds to submit the above number of tasks over. Defaults to 0 millis (i.e. static)
      */
     public UniformProfile(int taskSize, int tasks, double over) {
         this.taskSize = taskSize;

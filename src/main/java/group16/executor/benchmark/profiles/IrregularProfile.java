@@ -6,7 +6,6 @@ import group16.executor.benchmark.ProfileBuilder;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
-import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Arrays;
@@ -18,6 +17,8 @@ import java.util.concurrent.ExecutorService;
  */
 public class IrregularProfile extends Profile {
 
+    private static final double DYNAMIC_DISPTACH_TIME_STANDARD_DEV = 5.0;
+
     private DynamicDispatcher dynamicDispatcher;
     private final int tasks;
     private final int taskSizeMin;
@@ -28,7 +29,7 @@ public class IrregularProfile extends Profile {
      * @param tasks Total number of tasks to be submitted
      * @param taskSizeMax maximum size of tasks generated. Generally recommend 10000 - 1000000.
      * @param taskSizeMin minimum size of tasks generated. Generally recommend 10000 - 1000000.
-     * @param over How many seconds to submit the above number of tasks over. Defaults to 0 seconds (i.e. static)
+     * @param over How many milliseconds to submit the above number of tasks over. Defaults to 0 millis (i.e. static)
      */
     public IrregularProfile(DynamicDispatcher dynamicDispatcher, int tasks, int taskSizeMin, int taskSizeMax, int over) {
         this.dynamicDispatcher = dynamicDispatcher;
@@ -51,10 +52,9 @@ public class IrregularProfile extends Profile {
                 service.submit(builder.calculatorTask(accuracy));
             }
         } else {
-            double averageTimeSlice = (double)over / (double)tasks;
-            double[] dispatchTimes = divideIntoRandomlySizedNumbers(averageTimeSlice, tasks, builder.getRandom());
-            int accuracy = (int)Math.round(randomTaskSize.sample());
+            double[] dispatchTimes = divideIntoRandomlySizedNumbers(over, tasks, builder.getRandom());
             for (int i = 0; i < tasks; i++) {
+                int accuracy = (int)Math.round(randomTaskSize.sample());
                 dynamicDispatcher.dynamicallyDispatch(
                         builder.calculatorTask(accuracy),
                         dispatchTimes[i]);
@@ -64,14 +64,18 @@ public class IrregularProfile extends Profile {
     }
 
     private double[] divideIntoRandomlySizedNumbers(double numberToDivide, int divideInto, RandomGenerator rand) {
+        double averageDivision = numberToDivide / (double) divideInto;
         double[] nums = new double[divideInto];
+        RealDistribution realRand = new NormalDistribution(
+                rand,
+                averageDivision,
+                averageDivision / DYNAMIC_DISPTACH_TIME_STANDARD_DEV);
 
         for (int i = 0; i < nums.length-1; i++) {
-            nums[i] = rand.nextDouble() * numberToDivide;
+            nums[i] = Math.max(0,realRand.sample());
             numberToDivide -= nums[i];
         }
-        nums[nums.length-1] = numberToDivide;
-        Arrays.sort(nums);
+        nums[nums.length-1] = Math.max(0, numberToDivide);
 
         return nums;
     }

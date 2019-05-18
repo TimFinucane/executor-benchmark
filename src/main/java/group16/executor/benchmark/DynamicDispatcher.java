@@ -2,6 +2,7 @@ package group16.executor.benchmark;
 
 import javafx.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -9,6 +10,10 @@ import java.util.concurrent.ExecutorService;
 public class DynamicDispatcher {
 
     private List<Pair<Callable, Double>> taskWaitPairs;
+
+    public DynamicDispatcher() {
+        taskWaitPairs = new ArrayList<>();
+    }
 
     public void dynamicallyDispatch(Callable task, double timeTillNext) {
         taskWaitPairs.add(new Pair<>(task, timeTillNext));
