@@ -1,9 +1,15 @@
 package group16.executor.benchmark.profiles;
 
+import group16.executor.benchmark.DynamicDispatcher;
 import group16.executor.benchmark.Profile;
 import group16.executor.benchmark.ProfileBuilder;
+import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.distribution.RealDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
+import org.apache.commons.math3.random.JDKRandomGenerator;
+import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -12,6 +18,7 @@ import java.util.concurrent.ExecutorService;
  */
 public class IrregularProfile extends Profile {
 
+    private DynamicDispatcher dynamicDispatcher;
     private final int tasks;
     private final int taskSizeMin;
     private final int taskSizeMax;
@@ -23,8 +30,8 @@ public class IrregularProfile extends Profile {
      * @param taskSizeMin minimum size of tasks generated. Generally recommend 10000 - 1000000.
      * @param over How many seconds to submit the above number of tasks over. Defaults to 0 seconds (i.e. static)
      */
-    public IrregularProfile(int tasks, int taskSizeMin, int taskSizeMax, int over) {
-
+    public IrregularProfile(DynamicDispatcher dynamicDispatcher, int tasks, int taskSizeMin, int taskSizeMax, int over) {
+        this.dynamicDispatcher = dynamicDispatcher;
         this.tasks = tasks;
         this.taskSizeMin = taskSizeMin;
         this.taskSizeMax = taskSizeMax;
@@ -39,7 +46,26 @@ public class IrregularProfile extends Profile {
                 taskSizeMax);
 
         if (over == 0) { // Static
-            
+            for (int i = 0; i < tasks; i++) {
+                int accuracy = (int)Math.round(randomTaskSize.sample());
+                service.submit(builder.calculatorTask(accuracy));
+            }
+        } else {
+            double averageTimeSlice = (double)over / (double)tasks;
+            double[] dispatchTimes = divideIntoRandomlySizedNumbers(averageTimeSlice, tasks, builder.getRandom());
         }
+    }
+
+    private double[] divideIntoRandomlySizedNumbers(double numberToDivide, int divideInto, RandomGenerator rand) {
+        double[] nums = new double[divideInto];
+
+        for (int i = 0; i < nums.length-1; i++) {
+            nums[i] = rand.nextDouble() * numberToDivide;
+            numberToDivide -= nums[i];
+        }
+        nums[nums.length-1] = numberToDivide;
+        Arrays.sort(nums);
+
+        return nums;
     }
 }
