@@ -4,13 +4,16 @@ import java.util.concurrent.ExecutorService;
 
 import group16.executor.benchmark.Profile;
 import group16.executor.benchmark.ProfileBuilder;
+import group16.executor.benchmark.helpers.Dispatcher;
+import group16.executor.benchmark.helpers.DynamicDispatcher;
+import group16.executor.benchmark.helpers.StaticDispatcher;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
 
 /**
  * This profile submits uniform/same sized tasks of the given size, at the given rate.
  */
-public class UniformProfile extends DynamicProfile {
+public class UniformProfile extends Profile {
     /**
      *
      * @param taskSize - Size of task. Generally recommend 10000 - 1000000. Will submit +-20% of this amount
@@ -26,26 +29,33 @@ public class UniformProfile extends DynamicProfile {
         this(taskSize, size, 0);
     }
 
-
     @Override
-    protected void run(ExecutorService service, ProfileBuilder builder) {
+    protected Dispatcher generate(ProfileBuilder builder) {
         RealDistribution randomTaskSize = new NormalDistribution(
             builder.getRandom(),
             (double)taskSize, // Mean
             ((double)taskSize) / 30.0); // 99.7% of results lie within +-20% of the task size
 
         if(over == 0.0) {
+            StaticDispatcher dispatch = new StaticDispatcher(tasks);
+
             for(int i = 0; i < tasks; ++i) {
                 int accuracy = (int)Math.round(randomTaskSize.sample());
-                service.submit(builder.calculatorTask(accuracy));
+                dispatch.submit(builder.calculator(accuracy));
             }
+
+            return dispatch;
         }
         else {
+            DynamicDispatcher dispatch = new DynamicDispatcher(tasks);
+            double[] waitTimes = builder.splitTime(over, tasks);
+
             for (int i = 0; i < tasks; i++) {
                 int accuracy = (int)Math.round(randomTaskSize.sample());
-                addToDynamicDispatch(builder.calculatorTask(accuracy));
+                dispatch.submit(builder.calculator(accuracy), waitTimes[i]);
             }
-            dynamicallyDispatch(service, over, builder.getRandom());
+
+            return dispatch;
         }
     }
 

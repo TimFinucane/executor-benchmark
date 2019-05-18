@@ -2,15 +2,12 @@ package group16.executor.benchmark.profiles;
 
 import group16.executor.benchmark.Profile;
 import group16.executor.benchmark.ProfileBuilder;
-import org.apache.commons.math3.distribution.AbstractIntegerDistribution;
-import org.apache.commons.math3.distribution.AbstractRealDistribution;
+import group16.executor.benchmark.helpers.Dispatcher;
+import group16.executor.benchmark.helpers.StaticDispatcher;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
 
-import java.util.ArrayList;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This profile submits halting tasks (involving a lot of waiting), and cpu intensive tasks
@@ -32,7 +29,7 @@ public class UIProfile extends Profile {
     }
 
     @Override
-    public void run(ExecutorService service, ProfileBuilder builder) {
+    protected Dispatcher generate(ProfileBuilder builder) {
         RealDistribution randomAccuracy = new NormalDistribution(
             builder.getRandom(),
             (double)cpuTaskSize,
@@ -45,19 +42,23 @@ public class UIProfile extends Profile {
             uiTaskTime / 30.0
         );
 
+        StaticDispatcher dispatch = new StaticDispatcher(tasks);
+
         for(int i = 0; i < tasks; ++i) {
             if(builder.chance(ratio)) { // UI task
                 double time = randomTime.sample();
-                service.submit(builder.waitTask(time));
+                dispatch.submit(builder.waiter(time));
             } else { // CPU Task
                 int accuracyValue = (int)Math.round(randomAccuracy.sample());
-                service.submit(builder.calculatorTask(accuracyValue));
+                dispatch.submit(builder.calculator(accuracyValue));
             }
         }
+
+        return dispatch;
     }
 
-    int tasks;
-    double ratio;
-    int cpuTaskSize;
-    double uiTaskTime;
+    private int tasks;
+    private double ratio;
+    private int cpuTaskSize;
+    private double uiTaskTime;
 }
