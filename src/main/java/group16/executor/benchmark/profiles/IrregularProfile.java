@@ -1,12 +1,8 @@
 package group16.executor.benchmark.profiles;
 
 import group16.executor.benchmark.DynamicDispatcher;
-import group16.executor.benchmark.Profile;
 import group16.executor.benchmark.ProfileBuilder;
 import group16.executor.benchmark.customDistributions.BimodalDistribution;
-import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.commons.math3.distribution.RealDistribution;
-import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.concurrent.ExecutorService;
 
@@ -15,11 +11,9 @@ import java.util.concurrent.ExecutorService;
  * some time period according to some timing variance. The distribution of task size will be a bimodal distribution,
  * simulating a set of tasks with variance in order of magnitude.
  */
-public class IrregularProfile extends Profile {
+public class IrregularProfile extends DynamicProfile {
 
-    private static final double DYNAMIC_DISPTACH_TIME_STANDARD_DEV = 5.0;
 
-    private DynamicDispatcher dynamicDispatcher;
     private final int tasks;
     private final int task1Avg;
     private final int task1Sd;
@@ -29,8 +23,6 @@ public class IrregularProfile extends Profile {
     private final int over;
 
     /**
-     *
-     * @param dynamicDispatcher
      * @param tasks Total number of tasks to be submitted
      * @param task1Avg
      * @param task1Sd
@@ -39,9 +31,8 @@ public class IrregularProfile extends Profile {
      * @param ratioOfTasks
      * @param over How many milliseconds to submit the above number of tasks over. Defaults to 0 millis (i.e. static)
      */
-    public IrregularProfile(DynamicDispatcher dynamicDispatcher, int tasks, int task1Avg, int task1Sd, int task2Avg,
+    public IrregularProfile(int tasks, int task1Avg, int task1Sd, int task2Avg,
                             int task2Sd, double ratioOfTasks, int over) {
-        this.dynamicDispatcher = dynamicDispatcher;
         this.tasks = tasks;
         this.task1Avg = task1Avg;
         this.task1Sd = task1Sd;
@@ -67,31 +58,13 @@ public class IrregularProfile extends Profile {
                 service.submit(builder.calculatorTask(accuracy));
             }
         } else {
-            double[] dispatchTimes = divideIntoRandomlySizedNumbers(over, tasks, builder.getRandom());
             for (int i = 0; i < tasks; i++) {
                 int accuracy = (int)Math.round(randomTaskSize.sample());
-                dynamicDispatcher.dynamicallyDispatch(
-                        builder.calculatorTask(accuracy),
-                        dispatchTimes[i]);
+                addToDynamicDispatch(builder.calculatorTask(accuracy));
             }
-            dynamicDispatcher.begin(service);
+            dynamicallyDispatch(service, over, builder.getRandom());
         }
     }
 
-    private double[] divideIntoRandomlySizedNumbers(double numberToDivide, int divideInto, RandomGenerator rand) {
-        double averageDivision = numberToDivide / (double) divideInto;
-        double[] nums = new double[divideInto];
-        RealDistribution realRand = new NormalDistribution(
-                rand,
-                averageDivision,
-                averageDivision / DYNAMIC_DISPTACH_TIME_STANDARD_DEV);
 
-        for (int i = 0; i < nums.length-1; i++) {
-            nums[i] = Math.max(0,realRand.sample());
-            numberToDivide -= nums[i];
-        }
-        nums[nums.length-1] = Math.max(0, numberToDivide);
-
-        return nums;
-    }
 }
