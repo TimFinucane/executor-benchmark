@@ -1,6 +1,5 @@
 package group16.executor.benchmark.profiles;
 
-import group16.executor.benchmark.DynamicDispatcher;
 import group16.executor.benchmark.ProfileBuilder;
 import group16.executor.benchmark.customDistributions.BimodalDistribution;
 
@@ -24,11 +23,11 @@ public class IrregularProfile extends DynamicProfile {
 
     /**
      * @param tasks Total number of tasks to be submitted
-     * @param task1Avg
-     * @param task1Sd
-     * @param task2Avg
-     * @param task2Sd
-     * @param ratioOfTasks
+     * @param task1Avg Average value for task size in first distribution
+     * @param task1Sd Standard deviation for task size in first distribution
+     * @param task2Avg Average value for task size in second distribution
+     * @param task2Sd Standard deviation for task size in second distribution
+     * @param ratioOfTasks Ratio of tasks sizes from the first distribution that will be dispatched
      * @param over How many milliseconds to submit the above number of tasks over. Defaults to 0 millis (i.e. static)
      */
     public IrregularProfile(int tasks, int task1Avg, int task1Sd, int task2Avg,
