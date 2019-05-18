@@ -10,20 +10,20 @@ import org.apache.commons.math3.distribution.RealDistribution;
 /**
  * This profile submits uniform/same sized tasks of the given size, at the given rate.
  */
-public class UniformProfile extends Profile {
+public class UniformProfile extends DynamicProfile {
     /**
      *
      * @param taskSize - Size of task. Generally recommend 10000 - 1000000. Will submit +-20% of this amount
      * @param tasks - Number of tasks
      * @param over - How many milliseconds to submit the above number of tasks over. Defaults to 0 millis (i.e. static)
      */
-    public UniformProfile(int taskSize, int tasks, double over) {
+    public UniformProfile(int taskSize, int tasks, int over) {
         this.taskSize = taskSize;
         this.tasks = tasks;
         this.over = over;
     }
     public UniformProfile(int taskSize, int size) {
-        this(taskSize, size, 0.0);
+        this(taskSize, size, 0);
     }
 
 
@@ -41,12 +41,15 @@ public class UniformProfile extends Profile {
             }
         }
         else {
-            // TODO:
-            throw new UnsupportedOperationException("Not implemented");
+            for (int i = 0; i < tasks; i++) {
+                int accuracy = (int)Math.round(randomTaskSize.sample());
+                addToDynamicDispatch(builder.calculatorTask(accuracy));
+            }
+            dynamicallyDispatch(service, over, builder.getRandom());
         }
     }
 
     private int taskSize;
     private int tasks;
-    private double over;
+    private int over;
 }
