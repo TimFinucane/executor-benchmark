@@ -6,12 +6,6 @@ import group16.executor.benchmark.customDistributions.BimodalDistribution;
 import group16.executor.benchmark.helpers.Dispatcher;
 import group16.executor.benchmark.helpers.DynamicDispatcher;
 import group16.executor.benchmark.helpers.StaticDispatcher;
-import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.commons.math3.distribution.RealDistribution;
-import org.apache.commons.math3.random.RandomGenerator;
-
-import javax.xml.ws.Dispatch;
-import java.util.concurrent.ExecutorService;
 
 /**
  * This profile submits a number of halting (computational) tasks of varying size according to some variance, and over
@@ -83,7 +77,7 @@ public class IrregularProfile extends Profile {
             return dispatch;
         } else {
             DynamicDispatcher dispatch = new DynamicDispatcher(tasks);
-            double[] waitTimes = builder.splitTime(over, tasks);
+            double[] waitTimes = builder.splitTimeEvenly(over, tasks);
 
             for (int i = 0; i < tasks; i++) {
                 int accuracy = (int)Math.round(randomTaskSize.sample());

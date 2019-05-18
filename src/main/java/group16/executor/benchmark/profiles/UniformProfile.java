@@ -1,7 +1,5 @@
 package group16.executor.benchmark.profiles;
 
-import java.util.concurrent.ExecutorService;
-
 import group16.executor.benchmark.Profile;
 import group16.executor.benchmark.ProfileBuilder;
 import group16.executor.benchmark.helpers.Dispatcher;
@@ -48,7 +46,7 @@ public class UniformProfile extends Profile {
         }
         else {
             DynamicDispatcher dispatch = new DynamicDispatcher(tasks);
-            double[] waitTimes = builder.splitTime(over, tasks);
+            double[] waitTimes = builder.splitTimeEvenly(over, tasks);
 
             for (int i = 0; i < tasks; i++) {
                 int accuracy = (int)Math.round(randomTaskSize.sample());

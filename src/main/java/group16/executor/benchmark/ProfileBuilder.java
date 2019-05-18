@@ -50,7 +50,7 @@ public class ProfileBuilder {
      * Split a total amount of time into a series of chunks.
      * Returns an array of size splits, with each item being the length of the chunk.
      */
-    public double[] splitTime(double totalTime, int splits) {
+    public double[] splitTimeEvenly(double totalTime, int splits) {
         double averageDivision = totalTime / (double) splits;
 
         double[] nums = new double[splits];
@@ -69,6 +69,10 @@ public class ProfileBuilder {
         nums[nums.length-1] = Math.max(0, timeLeft);
 
         return nums;
+    }
+
+    public double[] splitTimeClustered(double totalTime, int splits, int clusters) {
+        return new double[splits];
     }
 
     private RandomGenerator random;
