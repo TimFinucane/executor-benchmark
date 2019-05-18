@@ -72,6 +72,11 @@ public class ProfileBuilder {
     }
 
     public double[] splitTimeClustered(double totalTime, int splits, int clusters) {
+
+        for (int i = 1; i <= splits; i++) {
+            double peakCenter = totalTime / ((1 / i) * (splits + 1));
+        }
+
         return new double[splits];
     }
 
