@@ -15,11 +15,15 @@ import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
+/**
+ * Test class of sorts for when one needs to visualize the dynamic load time generation. This class is useful because
+ * it's hard to know what your distribution parameters are generating without looking!
+ */
 public class SplitTimeClusteredVisualisation {
 
     public void showTimesPlot() {
         ProfileBuilder builder = new ProfileBuilder(0);
-        double[] times = builder.splitTimeClustered(1000, 1000, 5);
+        double[] times = builder.splitTimeClustered(500, 1000, 5);
 
         XYSeries graph = new XYSeries("Clustered timing chart");
         XYDataset xyDataset = new XYSeriesCollection(graph);
@@ -32,8 +36,8 @@ public class SplitTimeClusteredVisualisation {
 
         XYItemRenderer renderer = chart.getXYPlot().getRenderer();
         renderer.setSeriesPaint(0, Color.blue);
-        double size = 1;
-        double delta = size / 2.0;
+        double size = 0.3;
+        double delta = size / 0.3;
         Shape shape1 = new Rectangle2D.Double(-delta, -delta, size, size);
         Shape shape2 = new Ellipse2D.Double(-delta, -delta, size, size);
         renderer.setSeriesShape(0, shape1);
