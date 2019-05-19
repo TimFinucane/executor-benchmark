@@ -5,7 +5,7 @@ import org.apache.commons.math3.distribution.RealDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.RandomGeneratorFactory;
 
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -73,11 +73,26 @@ public class ProfileBuilder {
 
     public double[] splitTimeClustered(double totalTime, int splits, int clusters) {
 
-        for (int i = 1; i <= splits; i++) {
-            double peakCenter = totalTime / ((1 / i) * (splits + 1));
+        int toSplit = splits;
+        List<Double> times = new ArrayList<>();
+        for (int i = 1; i <= clusters; i++) {
+            double peakCenter = totalTime / ((1.0 / i) * (clusters + 1));
+            RealDistribution distribution = new NormalDistribution(
+                    random,
+                    peakCenter,
+                    totalTime / clusters); // split cluster sd's into fairly even chunks for coverage
+
+            for (int j = 0; j < totalTime / clusters; j++) {
+                times.add(distribution.sample());
+                toSplit--;
+            }
         }
 
-        return new double[splits];
+        //TODO: order, then loop through and find difference between each successive number
+        double[] asArray = times.stream().mapToDouble(i -> i).toArray();
+        Arrays.sort(asArray);
+
+        return asArray;
     }
 
     private RandomGenerator random;
