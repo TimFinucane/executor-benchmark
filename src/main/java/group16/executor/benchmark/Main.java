@@ -1,10 +1,7 @@
 package group16.executor.benchmark;
 
-import group16.executor.benchmark.distributionVisualisation.SplitTimeClusteredVisualisation;
 import group16.executor.benchmark.metrics.Metrics;
-import group16.executor.benchmark.customDistributions.BimodalDistribution;
-import group16.executor.benchmark.profiles.IrregularProfile;
-import group16.executor.benchmark.profiles.UIProfile;
+import group16.executor.benchmark.profiles.DynamicLoadProfile;
 
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
@@ -16,7 +13,7 @@ public class Main {
         try {
             ExecutorService service = Executors.newFixedThreadPool(8);
             Metrics metrics =
-                new IrregularProfile(1000, 1000000, 100000, 5.0)
+                new DynamicLoadProfile(10000, 1000, 3, 5)
                     .generate()
                     .run(service);
 

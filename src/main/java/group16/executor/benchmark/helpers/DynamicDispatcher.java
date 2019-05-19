@@ -1,11 +1,8 @@
 package group16.executor.benchmark.helpers;
 
-import javafx.util.Pair;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class DynamicDispatcher extends Dispatcher {
@@ -14,21 +11,34 @@ public class DynamicDispatcher extends Dispatcher {
     }
 
     public void submit(Callable task, double timeTillNext) {
-        taskWaitPairs.add(new Pair<>(task, timeTillNext));
+
+        // Add tasks to a dispatch queue, one for every dispatch period defined in the DISPATCH_PERIOD_MILLIS constant
+        // avoids the loss of precision with sleeping for trivially short time periods.
+        dispatchPeriodAccumulation += timeTillNext * TimeUnit.SECONDS.toMillis(1);
+        currentDispatch.add(task);
+        while (dispatchPeriodAccumulation >= DISPATCH_PERIOD_MILLIS) {
+            dispatchPeriodAccumulation -= DISPATCH_PERIOD_MILLIS;
+            taskPerTimeUnitMap.add(currentDispatch);
+            currentDispatch = new ArrayList<>();
+        }
     }
 
     protected void dispatchAllAndWait() {
-        for (Pair<Callable, Double> taskWait : taskWaitPairs) {
-            dispatch(taskWait.getKey());
-
-            // Wait before dispatching next task
+        for (List<Callable> tasks : taskPerTimeUnitMap) {
+            for (Callable task : tasks) {
+                dispatch(task);
+            }
             try {
-                Thread.sleep((long)(taskWait.getValue() * TimeUnit.SECONDS.toMillis(1)));
+                Thread.sleep(DISPATCH_PERIOD_MILLIS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private List<Pair<Callable, Double>> taskWaitPairs = new ArrayList<>();
+    private static final long DISPATCH_PERIOD_MILLIS = 30; // 15 millis and upwards seems to work pretty well
+
+    private double dispatchPeriodAccumulation = 0;
+    private List<Callable> currentDispatch = new ArrayList<>();
+    private List<List<Callable>> taskPerTimeUnitMap = new ArrayList<>();
 }
