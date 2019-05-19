@@ -71,6 +71,9 @@ public class ProfileBuilder {
         return nums;
     }
 
+    /**
+     * Split total time into series of chucks centered around evenly spaced clusters.
+     */
     public double[] splitTimeClustered(double totalTime, int splits, int clusters) {
         if (clusters == 0) { throw new IllegalArgumentException("There must be at least one cluster"); }
 
@@ -95,14 +98,18 @@ public class ProfileBuilder {
         }
 
         double[] times = timesList.stream().mapToDouble(i -> i).toArray();
-        Arrays.sort(times); // Sort and calculate intervals between these times generated
+        Arrays.sort(times);
+
+        return calculateIntervals(times, totalTime);
+    }
+
+    private double[] calculateIntervals(double[] times, double totalTime) {
         double[] intervals = new double[times.length];
         for (int i = 0; i < intervals.length - 1; i++) {
             intervals[i] = times[i + 1] - times[i];
         }
         intervals[intervals.length - 1] = totalTime - times[times.length - 1]; // Last interval is between last reading
-                                                                               // and totalTime
-        return intervals;
+        return intervals;                                                      // and totalTime
     }
 
     private RandomGenerator random;
