@@ -17,7 +17,7 @@ public class Main {
 //                new DynamicLoadProfile(10000, 1000000, 3, 5)
 //                    .generate()
 //                    .run(service);
-            // Metrics metrics = new GlobalLoadProfile(10000, 1000000, 15).generate().run(service);
+            Metrics metrics = new GlobalLoadProfile(10000, 1000000, 5).generate().run(service);
             // Metrics metrics = new UniformProfile(1000000, 10000) .generate().run(service);
 
             System.out.println("Time to run: " + metrics.totalTime + "s");
