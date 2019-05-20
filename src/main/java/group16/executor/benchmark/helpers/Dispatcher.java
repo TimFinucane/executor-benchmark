@@ -2,7 +2,10 @@ package group16.executor.benchmark.helpers;
 
 import group16.executor.benchmark.metrics.LocalMetrics;
 import group16.executor.benchmark.metrics.Metrics;
+import group16.executor.benchmark.profiles.DispatchListener;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +23,12 @@ public abstract class Dispatcher {
      * NOTE: totalTasks could be removed if necessary, its a big help but it isn't required for performing local metrics
      */
     public Dispatcher(int totalTasks) {
+        this(totalTasks, null);
+    }
+
+    public Dispatcher(int totalTasks, List<DispatchListener> dispatchListeners) {
         this.localMetrics = new LocalMetrics.Builder(totalTasks);
+        this.dispatchListeners = dispatchListeners == null ? new ArrayList<>(): dispatchListeners;
     }
 
     public Metrics run(ExecutorService service) {
@@ -36,6 +44,10 @@ public abstract class Dispatcher {
         }
 
         long endTime = System.nanoTime();
+        for (DispatchListener listener : dispatchListeners) { // Notify listeners dispatch is complete
+            listener.finishedDispatch();
+        }
+
         // Gather metrics together
         Metrics metrics = new Metrics();
         metrics.local = localMetrics.build();
@@ -70,6 +82,7 @@ public abstract class Dispatcher {
     // Next task index to be created. Does not indicate which tasks are completed.
     private AtomicInteger currentTask = new AtomicInteger(0);
     private LocalMetrics.Builder localMetrics;
+    private List<DispatchListener> dispatchListeners;
 
     private ExecutorService service;
 }

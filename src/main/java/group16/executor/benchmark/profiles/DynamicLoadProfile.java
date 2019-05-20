@@ -7,7 +7,6 @@ import group16.executor.benchmark.helpers.Dispatcher;
 import group16.executor.benchmark.helpers.DynamicDispatcher;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
-import org.apache.commons.math3.ml.clustering.Cluster;
 
 public class DynamicLoadProfile extends Profile {
 
