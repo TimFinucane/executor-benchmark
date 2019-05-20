@@ -19,7 +19,7 @@ public class DynamicDispatcher extends Dispatcher {
     }
 
     public DynamicDispatcher(int totalTasks) {
-        super (totalTasks);
+        this(totalTasks, null);
     }
 
     /**

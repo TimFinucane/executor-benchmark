@@ -11,7 +11,7 @@ import java.util.concurrent.Callable;
  */
 public class StaticDispatcher extends Dispatcher {
     public StaticDispatcher(int totalTasks) {
-        super(totalTasks);
+        this(totalTasks, null);
     }
 
     public StaticDispatcher(int totalTasks, List<DispatchListener> listeners) {
