@@ -21,13 +21,11 @@ import java.awt.geom.Rectangle2D;
  */
 public class SplitTimeClusteredVisualisation {
 
-    public void showTimesPlot() {
-        ProfileBuilder builder = new ProfileBuilder(0);
-        double[] times = builder.splitTimeClustered(500, 1000, 5);
+    public void showTimesPlot(double[] data) {
 
         XYSeries graph = new XYSeries("Clustered timing chart");
         XYDataset xyDataset = new XYSeriesCollection(graph);
-        for (double time : times) {
+        for (double time : data) {
             graph.add(new XYDataItem(time, 0));
         }
         JFreeChart chart = ChartFactory.createScatterPlot(
