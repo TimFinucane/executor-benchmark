@@ -13,18 +13,17 @@ import org.apache.commons.math3.distribution.RealDistribution;
  */
 public class UniformProfile extends Profile {
     /**
-     *
+     *  @param tasks - Number of tasks
      * @param taskSize - Size of task. Generally recommend 10000 - 1000000. Will submit +-20% of this amount
-     * @param tasks - Number of tasks
      * @param over - How many milliseconds to submit the above number of tasks over. Defaults to 0 millis (i.e. static)
      */
-    public UniformProfile(int taskSize, int tasks, int over) {
+    public UniformProfile(int tasks, int taskSize, int over) {
         this.taskSize = taskSize;
         this.tasks = tasks;
         this.over = over;
     }
-    public UniformProfile(int taskSize, int size) {
-        this(taskSize, size, 0);
+    public UniformProfile(int tasks, int taskSize) {
+        this(tasks, taskSize, 0);
     }
 
     @Override
