@@ -34,6 +34,8 @@ public abstract class Dispatcher {
     public Metrics run(ExecutorService service) {
         this.service = service;
         // TODO: Here is where global metrics would go
+        Metrics metrics = new Metrics();
+        
         long startTime = System.nanoTime();
         dispatchAllAndWait();
         service.shutdown();
@@ -49,7 +51,7 @@ public abstract class Dispatcher {
         }
 
         // Gather metrics together
-        Metrics metrics = new Metrics();
+
         metrics.local = localMetrics.build();
         metrics.totalTime = (endTime - startTime) / (double) TimeUnit.SECONDS.toNanos(1);
 
