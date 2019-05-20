@@ -34,7 +34,7 @@ public class UniformProfile extends Profile {
             (double)taskSize, // Mean
             ((double)taskSize) / 30.0); // 99.7% of results lie within +-20% of the task size
 
-        if(over == 0.0) {
+        if(over == 0.0) { // Static
             StaticDispatcher dispatch = new StaticDispatcher(tasks);
 
             for(int i = 0; i < tasks; ++i) {

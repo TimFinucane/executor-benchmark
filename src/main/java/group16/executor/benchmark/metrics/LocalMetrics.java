@@ -1,9 +1,11 @@
 package group16.executor.benchmark.metrics;
 
-import java.sql.Time;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * This class is used for gathering and showing metrics related to the tasks submitted to the service.
+ */
 public class LocalMetrics {
     public static class Builder {
         public Builder(int totalTasks) {
@@ -43,6 +45,13 @@ public class LocalMetrics {
         // TODO: We would clone this if that wasn't so silly
         return completionTimes;
     }
+    public double maxCompletionTime() {
+        return Arrays.stream(completionTimes).max().orElse(-1.0);
+    }
+    public double averageCompletionTime() {
+        return Arrays.stream(completionTimes).average().orElse(-1.0);
+    }
+
     public int getTotalTasks() {
         return totalTasks;
     }

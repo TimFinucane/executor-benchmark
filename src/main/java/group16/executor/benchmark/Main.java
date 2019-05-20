@@ -13,18 +13,18 @@ public class Main {
         try {
             ExecutorService service = Executors.newFixedThreadPool(8);
             Metrics metrics =
-                new DynamicLoadProfile(10000, 1000, 3, 5)
+                new DynamicLoadProfile(10000, 1000000, 3, 5)
                     .generate()
                     .run(service);
 
             System.out.println("Time to run: " + metrics.totalTime + "s");
             System.out.println(
                 "Avg. request completion time: "
-                + Arrays.stream(metrics.local.getCompletionTimes()).average().getAsDouble()
+                + metrics.local.averageCompletionTime()
             );
             System.out.println(
                 "Max request completion time: "
-                + Arrays.stream(metrics.local.getCompletionTimes()).max().getAsDouble()
+                + metrics.local.maxCompletionTime()
             );
         } catch(Exception e) {
             e.printStackTrace();

@@ -6,9 +6,13 @@ import group16.executor.benchmark.metrics.Metrics;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * A dispatcher controls the submitting of tasks to an ExecutorService, whilst gathering metrics about the tasks.
+ * Publicly it contains methods for performing the submitting and measuring, whilst implementations of the Dispatcher
+ * will determine how tasks can be submitted.
+ */
 public abstract class Dispatcher {
     /**
      * Create a dispatcher capable of submitting tasks to an ExecutorService.

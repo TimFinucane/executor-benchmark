@@ -3,8 +3,10 @@ package group16.executor.benchmark.helpers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 
+/**
+ * A static dispatcher submits all tasks simultaneously
+ */
 public class StaticDispatcher extends Dispatcher {
     public StaticDispatcher(int totalTasks) {
         super(totalTasks);

@@ -75,7 +75,8 @@ public class IrregularProfile extends Profile {
             }
 
             return dispatch;
-        } else {
+        }
+        else {
             DynamicDispatcher dispatch = new DynamicDispatcher(tasks);
             double[] waitTimes = builder.splitTimeEvenly(over, tasks);
 
