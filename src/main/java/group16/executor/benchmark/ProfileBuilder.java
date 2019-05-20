@@ -78,5 +78,4 @@ public class ProfileBuilder {
     private RandomGenerator random;
 
     private static final double DYNAMIC_DISPATCH_TIME_STANDARD_DEV = 5.0;
-    private static final double DYNAMIC_DISPATCH_LOAD_CLUSTER_AGGRESSIVENESS = 6.0;
 }
