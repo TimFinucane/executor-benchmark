@@ -1,6 +1,7 @@
-package group16.executor.benchmark.distributionVisualisation;
+package group16.executor.benchmark;
 
-import group16.executor.benchmark.ProfileBuilder;
+import group16.executor.benchmark.customDistributions.ClusterDistribution;
+import org.apache.commons.math3.random.RandomGeneratorFactory;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartFrame;
 import org.jfree.chart.JFreeChart;
@@ -14,15 +15,14 @@ import org.jfree.data.xy.XYSeriesCollection;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Random;
 
 /**
  * Test class of sorts for when one needs to visualize the dynamic load time generation. This class is useful because
  * it's hard to know what your distribution parameters are generating without looking!
  */
-public class SplitTimeClusteredVisualisation {
-
-    public void showTimesPlot(double[] data) {
-
+public class DistributionVisualiser {
+    public static void showTimesPlot(double[] data) {
         XYSeries graph = new XYSeries("Clustered timing chart");
         XYDataset xyDataset = new XYSeriesCollection(graph);
         for (double time : data) {
@@ -45,4 +45,13 @@ public class SplitTimeClusteredVisualisation {
         graphFrame.setSize(300, 300);
     }
 
+    public static void main(String[] args) {
+        double[] samples = new ClusterDistribution(
+                RandomGeneratorFactory.createRandomGenerator(new Random()),
+                5,
+                1.0
+        ).sample(1000);
+
+        showTimesPlot(samples);
+    }
 }

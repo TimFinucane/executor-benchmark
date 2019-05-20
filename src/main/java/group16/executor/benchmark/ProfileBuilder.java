@@ -51,56 +51,19 @@ public class ProfileBuilder {
      * Returns an array of size splits, with each item being the length of the chunk.
      */
     public double[] splitTimeEvenly(double totalTime, int splits) {
-        double averageDivision = totalTime / (double) splits;
+        double gap = totalTime / (double) (splits + 1);
+        double[] times = new double[splits];
 
-        double[] nums = new double[splits];
         RealDistribution realRand = new NormalDistribution(
             random,
-            averageDivision,
-            averageDivision / DYNAMIC_DISPATCH_TIME_STANDARD_DEV
+            0,
+            gap / DYNAMIC_DISPATCH_TIME_STANDARD_DEV
         );
 
-        // TODO: Logic error, what if last number is negative??
-        double timeLeft = totalTime;
-        for (int i = 0; i < nums.length-1; i++) {
-            nums[i] = Math.max(0,realRand.sample());
-            timeLeft -= nums[i];
-        }
-        nums[nums.length-1] = Math.max(0, timeLeft);
+        for (int i = 0; i < times.length; i++)
+            times[i] = Math.max(0, gap * (i + 1) + realRand.sample());
 
-        return nums;
-    }
-
-    /**
-     * Split total time into series of chucks centered around evenly spaced clusters.
-     */
-    public double[] splitTimeClustered(double totalTime, int splits, int clusters) {
-        if (clusters == 0) { throw new IllegalArgumentException("There must be at least one cluster"); }
-
-        double splitsLeft = splits;
-        List<Double> timesList = new ArrayList<>();
-        RealDistribution distribution = null;
-        for (int i = 1; i <= clusters; i++) {
-            double peakCenter = totalTime / ((1.0 / i) * (clusters + 1));
-            distribution = new NormalDistribution(
-                    random,
-                    peakCenter,
-                    (totalTime / clusters) / DYNAMIC_DISPATCH_LOAD_CLUSTER_AGGRESSIVENESS);
-            // split cluster sd's into fairly even chunks for coverage
-
-            for (int j = 0; j < splits / clusters; j++) {
-                timesList.add(Math.max(0, distribution.sample()));
-                splitsLeft--;
-            }
-        }
-        for (int i = 0; i < splitsLeft; i++) { // If splits doesn't perfects divide into clusters then add remaining
-            timesList.add(Math.max(0, distribution.sample()));
-        }
-
-        double[] times = timesList.stream().mapToDouble(i -> i).toArray();
-        Arrays.sort(times);
-
-        return calculateIntervals(times, totalTime);
+        return times;
     }
 
     private double[] calculateIntervals(double[] times, double totalTime) {

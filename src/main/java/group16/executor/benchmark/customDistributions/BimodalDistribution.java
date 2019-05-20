@@ -1,5 +1,6 @@
 package group16.executor.benchmark.customDistributions;
 
+import group16.executor.benchmark.helpers.RealSampler;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -8,7 +9,7 @@ import org.apache.commons.math3.random.RandomGenerator;
  * Extension of NormalDistribution with only sample() overwritten and extended to sample from a bimodal distribution.
  * Approximates a bimodal distribution by using 2 normal distributions and randomly picking from each
  */
-public class BimodalDistribution extends NormalDistribution {
+public class BimodalDistribution implements RealSampler {
 
     private RandomGenerator rg;
     private double ratio;

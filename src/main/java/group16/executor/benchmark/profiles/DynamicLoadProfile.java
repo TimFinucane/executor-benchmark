@@ -2,10 +2,12 @@ package group16.executor.benchmark.profiles;
 
 import group16.executor.benchmark.Profile;
 import group16.executor.benchmark.ProfileBuilder;
+import group16.executor.benchmark.customDistributions.ClusterDistribution;
 import group16.executor.benchmark.helpers.Dispatcher;
 import group16.executor.benchmark.helpers.DynamicDispatcher;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
+import org.apache.commons.math3.ml.clustering.Cluster;
 
 public class DynamicLoadProfile extends Profile {
 
@@ -36,7 +38,7 @@ public class DynamicLoadProfile extends Profile {
                 ((double)taskSize) / 30.0); // 99.7% of results lie within +-20% of the task size
 
         DynamicDispatcher dispatch = new DynamicDispatcher(tasks);
-        double[] waitTimes = builder.splitTimeClustered(over, tasks, loadPeaks);
+        double[] waitTimes = new ClusterDistribution(builder.getRandom(), this.loadPeaks, this.over).sample(this.tasks);
 
         for (int i = 0; i < tasks; i++) {
             int accuracy = (int)Math.round(randomTaskSize.sample());
