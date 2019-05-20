@@ -3,10 +3,12 @@ package group16.executor.benchmark.helpers;
 import group16.executor.benchmark.metrics.LocalMetrics;
 import group16.executor.benchmark.metrics.Metrics;
 
+import java.lang.management.ManagementFactory;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import com.sun.management.OperatingSystemMXBean;
 
 /**
  * A dispatcher controls the submitting of tasks to an ExecutorService, whilst gathering metrics about the tasks.
@@ -27,8 +29,10 @@ public abstract class Dispatcher {
         this.service = service;
         // TODO: Here is where global metrics would go
         Metrics metrics = new Metrics();
-        
+        OperatingSystemMXBean bean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+
         long startTime = System.nanoTime();
+        long cpuBefore = bean.getProcessCpuTime();
         dispatchAllAndWait();
         service.shutdown();
         try {
@@ -36,10 +40,17 @@ public abstract class Dispatcher {
         } catch(InterruptedException e) {
             System.out.println("System was interrupted from waiting for termination!");
         }
-
+        long cpuAfter = bean.getProcessCpuTime();
         long endTime = System.nanoTime();
+        long percent;
+        if (endTime > startTime)
+            percent = ((cpuAfter-cpuBefore)*100L)/
+                    (endTime-startTime);
+        else percent = 0;
+        int numberOfProcessors = Runtime.getRuntime().availableProcessors();
+        percent = percent/numberOfProcessors;
+        metrics.CPUUtilization = percent;
         // Gather metrics together
-
         metrics.local = localMetrics.build();
         metrics.totalTime = (endTime - startTime) / (double) TimeUnit.SECONDS.toNanos(1);
 
