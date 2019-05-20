@@ -16,7 +16,10 @@ public class Main {
                 new DynamicLoadProfile(10000, 1000000, 3, 5)
                     .generate()
                     .run(service);
-
+            System.out.println(
+                    "CPU Utilization: "
+                            + metrics.global.getProcessCpuLoad() + "%"
+            );
             System.out.println("Time to run: " + metrics.totalTime + "s");
             System.out.println(
                 "Avg. request completion time: "
@@ -26,6 +29,7 @@ public class Main {
                 "Max request completion time: "
                 + metrics.local.maxCompletionTime()
             );
+
         } catch(Exception e) {
             e.printStackTrace();
         }
