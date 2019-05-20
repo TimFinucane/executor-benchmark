@@ -1,5 +1,6 @@
 package group16.executor.benchmark.helpers;
 
+import group16.executor.benchmark.profiles.DispatchListener;
 import org.apache.commons.math3.util.Pair;
 
 import java.util.ArrayList;
@@ -12,9 +13,13 @@ import java.util.concurrent.TimeUnit;
  * A dynamic dispatcher dispatches tasks to the executor service over time.
  */
 public class DynamicDispatcher extends Dispatcher {
-    public DynamicDispatcher(int totalTasks) {
-        super(totalTasks);
+    public DynamicDispatcher(int totalTasks, List<DispatchListener> listeners) {
+        super(totalTasks, listeners);
         tasks = new ArrayList<>(totalTasks);
+    }
+
+    public DynamicDispatcher(int totalTasks) {
+        this(totalTasks, null);
     }
 
     /**

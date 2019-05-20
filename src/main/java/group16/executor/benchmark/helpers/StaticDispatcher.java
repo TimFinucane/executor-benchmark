@@ -1,5 +1,7 @@
 package group16.executor.benchmark.helpers;
 
+import group16.executor.benchmark.profiles.DispatchListener;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -9,7 +11,11 @@ import java.util.concurrent.Callable;
  */
 public class StaticDispatcher extends Dispatcher {
     public StaticDispatcher(int totalTasks) {
-        super(totalTasks);
+        this(totalTasks, null);
+    }
+
+    public StaticDispatcher(int totalTasks, List<DispatchListener> listeners) {
+        super(totalTasks, listeners);
     }
 
     public void submit(Callable task) {

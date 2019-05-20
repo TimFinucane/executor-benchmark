@@ -29,7 +29,7 @@ public class IrregularProfile extends Profile {
      * @param task2Avg Average value for task size in second distribution (Defaults to 10x avg. of first distribution)
      * @param task2Sd Standard deviation for task size in second distribution (Defaults to 10x sd of first distribution)
      * @param ratioOfTasks Ratio of tasks sizes from the first distribution that will be dispatched (defaults to 0.5)
-     * @param over How many milliseconds to submit the above number of tasks over. Defaults to 0 millis (i.e. static)
+     * @param over How many seconds to submit the above number of tasks over. Defaults to 0 seconds (i.e. static)
      */
     public IrregularProfile(int tasks, int task1Avg, int task1Sd, int task2Avg,
                             int task2Sd, double ratioOfTasks, double over) {

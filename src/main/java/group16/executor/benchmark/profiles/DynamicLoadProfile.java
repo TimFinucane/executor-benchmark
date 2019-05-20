@@ -7,7 +7,6 @@ import group16.executor.benchmark.helpers.Dispatcher;
 import group16.executor.benchmark.helpers.DynamicDispatcher;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.RealDistribution;
-import org.apache.commons.math3.ml.clustering.Cluster;
 
 public class DynamicLoadProfile extends Profile {
 
@@ -19,10 +18,10 @@ public class DynamicLoadProfile extends Profile {
     /**
      * @param tasks
      * @param taskSize
-     * @param loadPeaks
      * @param over
+     * @param loadPeaks
      */
-    public DynamicLoadProfile(int tasks, int taskSize, int loadPeaks, int over) {
+    public DynamicLoadProfile(int tasks, int taskSize, int over, int loadPeaks) {
         if (over == 0) { throw new IllegalArgumentException("A dynamic load profile cannot be statically dispatched"); }
         this.tasks = tasks;
         this.taskSize = taskSize;
