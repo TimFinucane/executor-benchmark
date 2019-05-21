@@ -5,7 +5,6 @@ public class ExponentialMovingAveragePredictor implements FuturePredictor {
     private final double alpha;
 
     private Double lastAverage;
-    private int lastValue;
 
     /**
      * @param alpha Weighting factor for exponential weighting reduction
@@ -27,15 +26,15 @@ public class ExponentialMovingAveragePredictor implements FuturePredictor {
     public int predictValueInFuture(int newValue) {
         if (lastAverage == null) {
             lastAverage = (double) newValue;
+            return newValue;
         }
 
-        double newAverage = lastAverage + alpha * (newValue - lastAverage);
-        int toReturn = newAverage > lastAverage
-                ? (int) Math.round(lastValue + (lastValue - newAverage))
-                : (int) Math.round(newAverage);
-        lastAverage = newAverage;
-        lastValue = newValue;
+        double nextAverage = lastAverage + alpha * (newValue - lastAverage);
+        if (nextAverage > lastAverage) {
+            nextAverage = newValue + (newValue - nextAverage);
+        }
+        lastAverage = nextAverage;
 
-        return toReturn;
+        return (int) Math.round(nextAverage);
     }
 }
