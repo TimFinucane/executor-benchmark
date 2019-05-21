@@ -13,6 +13,7 @@ public class Main {
 
         try {
             ExecutorService service = Executors.newFixedThreadPool(8);
+
 //            Metrics metrics =
 //                new DynamicLoadProfile(10000, 1000000, 3, 5)
 //                    .generate()
@@ -22,7 +23,7 @@ public class Main {
 
             System.out.println(
                     "CPU Utilization: "
-                            + metrics.global.getProcessCpuLoad() + "%"
+                            + metrics.CPUUtilization + "%"
             );
             System.out.println("Time to run: " + metrics.totalTime + "s");
             System.out.println(
