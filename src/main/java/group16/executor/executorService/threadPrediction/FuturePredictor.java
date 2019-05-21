@@ -8,5 +8,5 @@ public interface FuturePredictor {
      * @param value A number to predict from
      * @return A predicted value given this and previous calls to this method
      */
-    int predictValueInFuture(int value);
+    int predict(int value);
 }

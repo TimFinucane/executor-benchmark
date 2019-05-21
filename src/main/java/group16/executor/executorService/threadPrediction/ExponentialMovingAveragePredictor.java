@@ -23,7 +23,7 @@ public class ExponentialMovingAveragePredictor implements FuturePredictor {
      * @return Predicted value based on exponential moving average
      */
     @Override
-    public int predictValueInFuture(int newValue) {
+    public int predict(int newValue) {
         if (lastAverage == null) {
             lastAverage = (double) newValue;
             return newValue;
