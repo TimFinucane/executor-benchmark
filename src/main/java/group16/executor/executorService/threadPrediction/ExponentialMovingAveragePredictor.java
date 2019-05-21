@@ -30,11 +30,11 @@ public class ExponentialMovingAveragePredictor implements FuturePredictor {
         }
 
         double nextAverage = lastAverage + alpha * (newValue - lastAverage);
-        if (nextAverage > lastAverage) {
-            nextAverage = newValue + (newValue - nextAverage);
-        }
+        double toReturn = nextAverage > lastAverage
+                ? newValue + (newValue - nextAverage)
+                : nextAverage;
         lastAverage = nextAverage;
 
-        return (int) Math.round(nextAverage);
+        return (int) Math.round(toReturn);
     }
 }
