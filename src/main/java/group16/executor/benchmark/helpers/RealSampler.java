@@ -6,7 +6,7 @@ public interface RealSampler {
     double sample();
 
     static RealSampler fromDistribution(RealDistribution distribution) {
-        return () -> distribution.sample();
+        return distribution::sample;
     }
 
     default double[] sample(int numSamples) {
