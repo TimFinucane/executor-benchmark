@@ -1,4 +1,4 @@
-package group16.executor.benchmark;
+package group16.executor;
 
 import group16.executor.benchmark.metrics.Metrics;
 import group16.executor.benchmark.profiles.DynamicLoadProfile;

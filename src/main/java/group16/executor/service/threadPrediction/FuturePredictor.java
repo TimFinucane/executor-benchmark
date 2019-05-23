@@ -1,4 +1,4 @@
-package group16.executor.executorService.threadPrediction;
+package group16.executor.service.threadPrediction;
 
 public interface FuturePredictor {
 

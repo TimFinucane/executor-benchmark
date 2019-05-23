@@ -1,4 +1,4 @@
-package group16.executor.executorService;
+package group16.executor.service;
 
 import java.util.Collection;
 import java.util.List;
