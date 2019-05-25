@@ -6,18 +6,18 @@ import java.util.concurrent.Callable;
 public class DynamicExecutorThread extends Thread {
 
     private BlockingQueue<Callable> queue;
-    private QueueManager queueManager;
+    private TaskManager taskManager;
 
-    public DynamicExecutorThread(BlockingQueue<Callable> queue, QueueManager queueManager) {
+    public DynamicExecutorThread(BlockingQueue<Callable> queue, TaskManager taskManager) {
         this.queue = queue;
-        this.queueManager = queueManager;
+        this.taskManager = taskManager;
     }
 
     @Override
     public void run() {
         // TODO: Better concurrency
         if (queue.isEmpty()) {
-            queue = queueManager.nextQueue();
+            //queue = taskManager.nextQueue();
         }
 
         try {
