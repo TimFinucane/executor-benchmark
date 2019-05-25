@@ -15,17 +15,17 @@ public class NonEmptyRoundRobinTaskManagerTests {
 
     @Test
     public void emptyList() {
-        TaskManager qm = new NonEmptyRoundRobinTaskManager(new ArrayList<>());
-        Assert.assertNull(qm.nextTask());
+        TaskManager taskManager = new NonEmptyRoundRobinTaskManager(new ArrayList<>());
+        Assert.assertNull(taskManager.nextTask());
     }
 
     @Test
     public void singleQueueEmptyQueue() {
         List<BlockingQueue<Callable>> queues = new ArrayList<>();
         queues.add(new LinkedBlockingQueue<>());
-        TaskManager qm = new NonEmptyRoundRobinTaskManager(queues);
+        TaskManager taskManager = new NonEmptyRoundRobinTaskManager(queues);
 
-        Assert.assertNull(qm.nextTask());
+        Assert.assertNull(taskManager.nextTask());
     }
 
     @Test
@@ -37,10 +37,10 @@ public class NonEmptyRoundRobinTaskManagerTests {
         queue.add(callable);
         queues.add(queue);
 
-        TaskManager qm = new NonEmptyRoundRobinTaskManager(queues);
+        TaskManager taskManager = new NonEmptyRoundRobinTaskManager(queues);
 
-        Assert.assertEquals(callable, qm.nextTask());
-        Assert.assertNull(qm.nextTask());
+        Assert.assertEquals(callable, taskManager.nextTask());
+        Assert.assertNull(taskManager.nextTask());
     }
 
     @Test
@@ -53,12 +53,12 @@ public class NonEmptyRoundRobinTaskManagerTests {
         queue.add(callable2);
         queues.add(queue);
 
-        TaskManager qm = new NonEmptyRoundRobinTaskManager(queues);
+        TaskManager taskManager = new NonEmptyRoundRobinTaskManager(queues);
 
 
-        Assert.assertEquals(callable1, qm.nextTask());
-        Assert.assertEquals(callable2, qm.nextTask());
-        Assert.assertNull(qm.nextTask());
+        Assert.assertEquals(callable1, taskManager.nextTask());
+        Assert.assertEquals(callable2, taskManager.nextTask());
+        Assert.assertNull(taskManager.nextTask());
     }
 
     @Test
@@ -73,11 +73,11 @@ public class NonEmptyRoundRobinTaskManagerTests {
         queues.add(queue1);
         queues.add(queue2);
 
-        TaskManager qm = new NonEmptyRoundRobinTaskManager(queues);
+        TaskManager taskManager = new NonEmptyRoundRobinTaskManager(queues);
 
-        Assert.assertEquals(callable1, qm.nextTask());
-        Assert.assertEquals(callable2, qm.nextTask());
-        Assert.assertNull(qm.nextTask());
+        Assert.assertEquals(callable1, taskManager.nextTask());
+        Assert.assertEquals(callable2, taskManager.nextTask());
+        Assert.assertNull(taskManager.nextTask());
     }
 
     @Test
@@ -90,10 +90,10 @@ public class NonEmptyRoundRobinTaskManagerTests {
         queues.add(queue1);
         queues.add(queue2);
 
-        TaskManager qm = new NonEmptyRoundRobinTaskManager(queues);
+        TaskManager taskManager = new NonEmptyRoundRobinTaskManager(queues);
 
-        Assert.assertEquals(callable1, qm.nextTask());
-        Assert.assertNull(qm.nextTask());
+        Assert.assertEquals(callable1, taskManager.nextTask());
+        Assert.assertNull(taskManager.nextTask());
     }
 
     @Test
@@ -106,16 +106,16 @@ public class NonEmptyRoundRobinTaskManagerTests {
         queues.add(queue1);
         queues.add(queue2);
 
-        TaskManager qm = new NonEmptyRoundRobinTaskManager(queues);
+        TaskManager taskManager = new NonEmptyRoundRobinTaskManager(queues);
 
-        Assert.assertEquals(callable1, qm.nextTask());
-        Assert.assertNull(qm.nextTask());
+        Assert.assertEquals(callable1, taskManager.nextTask());
+        Assert.assertNull(taskManager.nextTask());
 
         Callable callable2 = () ->  null;
         queue1.add(callable2);
 
-        Assert.assertEquals(callable2, qm.nextTask());
-        Assert.assertNull(qm.nextTask());
+        Assert.assertEquals(callable2, taskManager.nextTask());
+        Assert.assertNull(taskManager.nextTask());
     }
 
     /**
@@ -143,17 +143,17 @@ public class NonEmptyRoundRobinTaskManagerTests {
         queues.add(queue2);
         queues.add(queue3);
 
-        TaskManager qm = new NonEmptyRoundRobinTaskManager(queues);
+        TaskManager taskManager = new NonEmptyRoundRobinTaskManager(queues);
 
-        Assert.assertEquals(callable1, qm.nextTask());
-        Assert.assertEquals(callable2, qm.nextTask());
+        Assert.assertEquals(callable1, taskManager.nextTask());
+        Assert.assertEquals(callable2, taskManager.nextTask());
 
         // Insert another element back at the first queue to test whether index is remembered
         Callable callable4 = () ->  null;
         queue1.add(callable4);
 
-        Assert.assertEquals(callable3, qm.nextTask());
-        Assert.assertEquals(callable4, qm.nextTask());
-        Assert.assertNull(qm.nextTask());
+        Assert.assertEquals(callable3, taskManager.nextTask());
+        Assert.assertEquals(callable4, taskManager.nextTask());
+        Assert.assertNull(taskManager.nextTask());
     }
 }

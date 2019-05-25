@@ -35,7 +35,7 @@ public class DynamicExecutorService extends AbstractExecutorService {
 
         this.threads = new ArrayList<>();
         for (int i = 0; i < numberOfThreads; i++) {
-            // this.threads.add(new DynamicExecutorThread(this.queues.get(0), new NonEmptyRoundRobinTaskManager(this.queues))); // TODO: very much change
+            this.threads.add(new DynamicExecutorThread(new NonEmptyRoundRobinTaskManager(queues)));
         }
     }
 
