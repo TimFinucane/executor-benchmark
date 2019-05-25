@@ -1,14 +1,14 @@
 package group16.executor.service;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DynamicExecutorService extends AbstractExecutorService {
 
-    public DynamicExecutorService(int numberOfQueues, int sampleRate) {
+    public DynamicExecutorService(int numberOfThreads, int numberOfQueues, int sampleRate) {
         this.sampleRate = sampleRate;
         this.executionsPerSample = new AtomicInteger(0);
         this.notShutDown = true;
@@ -27,6 +27,17 @@ public class DynamicExecutorService extends AbstractExecutorService {
             }
         });
         this.watcherThread.start();
+
+        // Set up queues and threads
+        this.queues = new ArrayList<>();
+        for (int i = 0; i < numberOfQueues; i++) {
+            this.queues.add(new LinkedBlockingQueue<>());
+        }
+
+        this.threads = new ArrayList<>();
+        for (int i = 0; i < numberOfThreads; i++) {
+            this.threads.add(new DynamicExecutorThread(this.queues));
+        }
     }
 
     @Override
@@ -63,6 +74,7 @@ public class DynamicExecutorService extends AbstractExecutorService {
     // TODO: Thread function. This could be made into a private static class instead
     private static void runThread() {}
 
+    private List<Queue<Callable>> queues;
     private List<Thread> threads;
     private Thread watcherThread;
 
