@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -21,7 +22,7 @@ public class NonEmptyRoundRobinTaskManagerTests {
 
     @Test
     public void singleQueueEmptyQueue() {
-        List<BlockingQueue<Callable>> queues = new ArrayList<>();
+        List<Queue<Callable>> queues = new ArrayList<>();
         queues.add(new LinkedBlockingQueue<>());
         TaskManager taskManager = new NonEmptyRoundRobinTaskManager(queues);
 
@@ -30,7 +31,7 @@ public class NonEmptyRoundRobinTaskManagerTests {
 
     @Test
     public void singleQueueSingleQueueItem() {
-        List<BlockingQueue<Callable>> queues = new ArrayList<>();
+        List<Queue<Callable>> queues = new ArrayList<>();
         BlockingQueue<Callable> queue = new LinkedBlockingQueue<>();
         Callable callable = () ->  null;
 
@@ -45,7 +46,7 @@ public class NonEmptyRoundRobinTaskManagerTests {
 
     @Test
     public void singleQueueTwoQueueItems() {
-        List<BlockingQueue<Callable>> queues = new ArrayList<>();
+        List<Queue<Callable>> queues = new ArrayList<>();
         BlockingQueue<Callable> queue = new LinkedBlockingQueue<>();
         Callable callable1 = () ->  null;
         Callable callable2 = () ->  null;
@@ -63,7 +64,7 @@ public class NonEmptyRoundRobinTaskManagerTests {
 
     @Test
     public void twoQueuesSingleQueueItemEach() {
-        List<BlockingQueue<Callable>> queues = new ArrayList<>();
+        List<Queue<Callable>> queues = new ArrayList<>();
         BlockingQueue<Callable> queue1 = new LinkedBlockingQueue<>();
         BlockingQueue<Callable> queue2 = new LinkedBlockingQueue<>();
         Callable callable1 = () ->  null;
@@ -82,7 +83,7 @@ public class NonEmptyRoundRobinTaskManagerTests {
 
     @Test
     public void twoQueuesOneIsEmpty() {
-        List<BlockingQueue<Callable>> queues = new ArrayList<>();
+        List<Queue<Callable>> queues = new ArrayList<>();
         BlockingQueue<Callable> queue1 = new LinkedBlockingQueue<>();
         BlockingQueue<Callable> queue2 = new LinkedBlockingQueue<>();
         Callable callable1 = () ->  null;
@@ -98,7 +99,7 @@ public class NonEmptyRoundRobinTaskManagerTests {
 
     @Test
     public void twoQueuesOneIsReplenished() {
-        List<BlockingQueue<Callable>> queues = new ArrayList<>();
+        List<Queue<Callable>> queues = new ArrayList<>();
         BlockingQueue<Callable> queue1 = new LinkedBlockingQueue<>();
         BlockingQueue<Callable> queue2 = new LinkedBlockingQueue<>();
         Callable callable1 = () ->  null;
@@ -129,7 +130,7 @@ public class NonEmptyRoundRobinTaskManagerTests {
      */
     @Test
     public void threeQueuesIndexIsRememberedAndWraparound() {
-        List<BlockingQueue<Callable>> queues = new ArrayList<>();
+        List<Queue<Callable>> queues = new ArrayList<>();
         BlockingQueue<Callable> queue1 = new LinkedBlockingQueue<>();
         BlockingQueue<Callable> queue2 = new LinkedBlockingQueue<>();
         BlockingQueue<Callable> queue3 = new LinkedBlockingQueue<>();

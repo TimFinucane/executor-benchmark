@@ -1,7 +1,7 @@
 package group16.executor.service.task.management;
 
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
+import java.util.Queue;
 import java.util.concurrent.Callable;
 
 /**
@@ -13,10 +13,10 @@ import java.util.concurrent.Callable;
  */
 public class NonEmptyRoundRobinTaskManager implements TaskManager {
 
-    private final List<BlockingQueue<Callable>> queues;
+    private final List<Queue<Callable>> queues;
     private int currentIndex;
 
-    public NonEmptyRoundRobinTaskManager(List<BlockingQueue<Callable>> queues) {
+    public NonEmptyRoundRobinTaskManager(List<Queue<Callable>> queues) {
         this.queues = queues;
         this.currentIndex = 0;
     }
@@ -28,8 +28,8 @@ public class NonEmptyRoundRobinTaskManager implements TaskManager {
      */
     @Override
     public Callable nextTask() {
-        synchronized (queues) {
-            for (int i = 0; i < queues.size(); i++) {
+        for (int i = 0; i < queues.size(); i++) {
+            synchronized (queues.get(currentIndex)) {
                 if (!queues.get(currentIndex).isEmpty()) {
                     return queues.get(currentIndex).remove();
                 }
