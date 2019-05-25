@@ -9,7 +9,7 @@ public class DynamicExecutorServiceTests {
 
     @Test
     public void testTerminates() {
-        DynamicExecutorService executorService = new DynamicExecutorService(1, 50);
+        DynamicExecutorService executorService = new DynamicExecutorService(1, 1, 50);
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -22,5 +22,4 @@ public class DynamicExecutorServiceTests {
             e.printStackTrace();
         }
     }
-
 }

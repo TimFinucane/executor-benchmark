@@ -1,19 +1,30 @@
 package group16.executor.service;
 
-import java.util.List;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 
 public class DynamicExecutorThread extends Thread {
 
-    private List<Queue<Callable>> queues;
+    private BlockingQueue<Callable> queue;
+    private QueueManager queueManager;
 
-    public DynamicExecutorThread(List<Queue<Callable>> queues) {
-        this.queues = queues;
+    public DynamicExecutorThread(BlockingQueue<Callable> queue, QueueManager queueManager) {
+        this.queue = queue;
+        this.queueManager = queueManager;
     }
 
     @Override
     public void run() {
+        // TODO: Better concurrency
+        if (queue.isEmpty()) {
+            queue = queueManager.nextNonEmptyQueue();
+        }
 
+        try {
+            queue.remove().call();
+        } catch (Exception e) {
+            System.out.println("Task threw exception at DynamicExecutorService thread level:");
+            e.printStackTrace();
+        }
     }
 }
