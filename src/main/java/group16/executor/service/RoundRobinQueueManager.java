@@ -22,10 +22,10 @@ public class RoundRobinQueueManager implements QueueManager {
         synchronized (queueIterationLock) {
             int index = currentIndex;
             for (int i = 0; i < queues.size(); i++) {
-                index = index >= queues.size() ? 0 : index + 1;
                 if (!queues.get(index).isEmpty()) {
                     return queues.get(index);
                 }
+                index = index >= queues.size() ? 0 : index + 1;
             }
         }
 
