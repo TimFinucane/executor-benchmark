@@ -1,6 +1,7 @@
 package group16.executor.service;
 
 import group16.executor.service.task.management.NonEmptyRoundRobinTaskManager;
+import group16.executor.service.task.management.TaskManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,15 +31,10 @@ public class DynamicExecutorService extends AbstractExecutorService {
         });
         this.watcherThread.start();
 
-        // Set up queues and threads
-        this.queues = new ArrayList<>();
-        for (int i = 0; i < numberOfQueues; i++) {
-            this.queues.add(new LinkedBlockingQueue<>());
-        }
-
+        this.taskManager = new NonEmptyRoundRobinTaskManager(numberOfQueues);
         this.threads = new ArrayList<>();
         for (int i = 0; i < numberOfThreads; i++) {
-            this.threads.add(new DynamicExecutorThread(new NonEmptyRoundRobinTaskManager(queues)));
+            this.threads.add(new DynamicExecutorThread(taskManager));
         }
     }
 
@@ -71,12 +67,13 @@ public class DynamicExecutorService extends AbstractExecutorService {
     @Override
     public void execute(Runnable command) {
         executionsPerSample.incrementAndGet();
+        taskManager.addTask(command);
     }
 
     // TODO: Thread function. This could be made into a private static class instead
     private static void runThread() {}
 
-    private List<Queue<Callable>> queues;
+    private TaskManager taskManager;
     private List<Thread> threads;
     private Thread watcherThread;
 

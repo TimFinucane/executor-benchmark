@@ -1,8 +1,12 @@
 package group16.executor.service.task.management;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class implements the task returning strategy 'look in the queues from where I was last to return the next
@@ -13,12 +17,24 @@ import java.util.concurrent.Callable;
  */
 public class NonEmptyRoundRobinTaskManager implements TaskManager {
 
-    private final List<Queue<Callable>> queues;
-    private int currentIndex;
+    private final List<BlockingQueue<Runnable>> queues;
+    private AtomicInteger currentIndex = new AtomicInteger(0);
 
-    public NonEmptyRoundRobinTaskManager(List<Queue<Callable>> queues) {
-        this.queues = queues;
-        this.currentIndex = 0;
+    public NonEmptyRoundRobinTaskManager(int queueCount) {
+        // Set up queues and threads
+        this.queues = new ArrayList<>(queueCount);
+        for (int i = 0; i < queueCount; i++) {
+            this.queues.add(new LinkedBlockingQueue<>());
+        }
+    }
+
+    // TODO: Buster, is this what you wanted? I'm sorry for taking away the whole initial passing in list of queues thing
+    // TODO:  but we would'nt be able to do dynamic loads with that manager.
+    public void addTask(Runnable task) {
+        for (int i = 0; i < queues.size(); i++) {
+            int index = currentIndex.getAndAccumulate(1, (a, b) -> (a + b) % this.queues.size());
+            queues.get(index).add(task);
+        }
     }
 
     /**
@@ -27,14 +43,17 @@ public class NonEmptyRoundRobinTaskManager implements TaskManager {
      * @return next non-empty queue
      */
     @Override
-    public Callable nextTask() {
+    public Runnable nextTask(int threadId) {
+        int index = currentIndex.get();
+
         for (int i = 0; i < queues.size(); i++) {
-            synchronized (queues.get(currentIndex)) {
-                if (!queues.get(currentIndex).isEmpty()) {
-                    return queues.get(currentIndex).remove();
-                }
-                currentIndex = currentIndex >= queues.size() - 1 ? 0 : currentIndex + 1;
+            // Try take an item off the queue. Returns null (immediately) if empty.
+            Runnable task = queues.get(index).poll();
+            if (task != null) {
+                return task;
             }
+
+            index = currentIndex.accumulateAndGet(1, (a, b) -> (a + b) % this.queues.size());
         }
 
         return null;
