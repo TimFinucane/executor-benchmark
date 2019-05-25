@@ -17,7 +17,7 @@ public class DynamicExecutorThread extends Thread {
     public void run() {
         // TODO: Better concurrency
         if (queue.isEmpty()) {
-            queue = queueManager.nextNonEmptyQueue();
+            queue = queueManager.nextQueue();
         }
 
         try {
