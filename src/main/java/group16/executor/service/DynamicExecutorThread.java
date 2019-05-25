@@ -1,5 +1,7 @@
 package group16.executor.service;
 
+import group16.executor.service.task.management.TaskManager;
+
 public class DynamicExecutorThread extends Thread {
 
     private TaskManager taskManager;

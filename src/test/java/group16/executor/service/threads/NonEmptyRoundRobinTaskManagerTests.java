@@ -1,7 +1,7 @@
 package group16.executor.service.threads;
 
-import group16.executor.service.NonEmptyRoundRobinTaskManager;
-import group16.executor.service.TaskManager;
+import group16.executor.service.task.management.NonEmptyRoundRobinTaskManager;
+import group16.executor.service.task.management.TaskManager;
 import org.junit.Assert;
 import org.junit.Test;
 

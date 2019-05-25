@@ -1,7 +1,6 @@
 package group16.executor.service.threads;
 
-import group16.executor.service.threadPrediction.WatermarkPredictor;
-import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
+import group16.executor.service.thread.prediction.WatermarkPredictor;
 import org.junit.Assert;
 import org.junit.Test;
 

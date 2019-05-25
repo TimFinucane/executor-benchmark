@@ -1,7 +1,7 @@
 package group16.executor.service.threads;
 
-import group16.executor.service.threadPrediction.ExponentialMovingAveragePredictor;
-import group16.executor.service.threadPrediction.FuturePredictor;
+import group16.executor.service.thread.prediction.ExponentialMovingAveragePredictor;
+import group16.executor.service.thread.prediction.FuturePredictor;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package group16.executor.service.threadPrediction;
+package group16.executor.service.thread.prediction;
 
 public class ExponentialMovingAveragePredictor implements FuturePredictor {
 
