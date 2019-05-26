@@ -6,6 +6,7 @@ import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -19,6 +20,7 @@ public class NonEmptyRoundRobinTaskManager implements TaskManager {
 
     private final List<BlockingQueue<Runnable>> queues;
     private AtomicInteger currentIndex = new AtomicInteger(0);
+    private AtomicInteger tasksRemaining = new AtomicInteger(0);
 
     public NonEmptyRoundRobinTaskManager(int queueCount) {
         // Set up queues and threads
@@ -31,10 +33,9 @@ public class NonEmptyRoundRobinTaskManager implements TaskManager {
     // TODO: Buster, is this what you wanted? I'm sorry for taking away the whole initial passing in list of queues thing
     // TODO:  but we would'nt be able to do dynamic loads with that manager.
     public void addTask(Runnable task) {
-        for (int i = 0; i < queues.size(); i++) {
-            int index = currentIndex.getAndAccumulate(1, (a, b) -> (a + b) % this.queues.size());
-            queues.get(index).add(task);
-        }
+        int index = currentIndex.getAndAccumulate(1, (a, b) -> (a + b) % this.queues.size());
+        queues.get(index).add(task);
+        tasksRemaining.incrementAndGet();
     }
 
     /**
@@ -43,13 +44,14 @@ public class NonEmptyRoundRobinTaskManager implements TaskManager {
      * @return next non-empty queue
      */
     @Override
-    public Runnable nextTask(int threadId) {
+    public Runnable nextTask(long time, TimeUnit unit) {
         int index = currentIndex.get();
 
         for (int i = 0; i < queues.size(); i++) {
             // Try take an item off the queue. Returns null (immediately) if empty.
             Runnable task = queues.get(index).poll();
             if (task != null) {
+                tasksRemaining.decrementAndGet();
                 return task;
             }
 
@@ -57,5 +59,10 @@ public class NonEmptyRoundRobinTaskManager implements TaskManager {
         }
 
         return null;
+    }
+
+    @Override
+    public int remainingTasks() {
+        return tasksRemaining.get();
     }
 }

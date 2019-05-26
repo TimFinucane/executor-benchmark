@@ -1,4 +1,4 @@
-package group16.executor.service.threads;
+package group16.executor.service.thread.prediction;
 
 import group16.executor.service.thread.prediction.WatermarkPredictor;
 import org.junit.Assert;

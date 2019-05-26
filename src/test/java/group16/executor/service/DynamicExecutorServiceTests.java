@@ -1,4 +1,4 @@
-package group16.executor.service.threads;
+package group16.executor.service;
 
 import group16.executor.service.DynamicExecutorService;
 import org.junit.Test;

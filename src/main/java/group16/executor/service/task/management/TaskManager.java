@@ -1,7 +1,6 @@
 package group16.executor.service.task.management;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides an interface for any client that wants to be able to retrieve a task given some strategy/implementation.
@@ -9,6 +8,7 @@ import java.util.concurrent.Callable;
 public interface TaskManager {
     /**
      * Called when a new thread is created, with the id of the thread
+     * @returns An identifier to call later taskManager methods with
      */
     default void addThread(int threadId) {}
 
@@ -18,12 +18,11 @@ public interface TaskManager {
     default void removeThread(int threadId) {}
 
     void addTask(Runnable task);
-    default void addTask(int threadId, Runnable task) {
-        addTask(task);
-    }
 
     /**
      * Note: Is blocking
      */
-    Runnable nextTask(int threadId) throws InterruptedException;
+    Runnable nextTask(long amount, TimeUnit unit) throws InterruptedException;
+
+    int remainingTasks();
 }
