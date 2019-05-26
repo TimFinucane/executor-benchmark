@@ -13,13 +13,9 @@ import java.util.concurrent.TimeUnit;
  * A dynamic dispatcher dispatches tasks to the executor service over time.
  */
 public class DynamicDispatcher extends Dispatcher {
-    public DynamicDispatcher(int totalTasks, List<DispatchListener> listeners) {
-        super(totalTasks, listeners);
-        tasks = new ArrayList<>(totalTasks);
-    }
-
     public DynamicDispatcher(int totalTasks) {
-        this(totalTasks, null);
+        super(totalTasks);
+        tasks = new ArrayList<>(totalTasks);
     }
 
     /**

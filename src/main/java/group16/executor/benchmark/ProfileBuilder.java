@@ -21,7 +21,7 @@ public class ProfileBuilder {
         return this.random;
     }
 
-    public Callable<?> calculator(int accuracy) {
+    public static Callable<?> calculator(int accuracy) {
         return () -> {
             double val = 0;
 
@@ -32,7 +32,7 @@ public class ProfileBuilder {
             return val;
         };
     }
-    public Callable<?> waiter(double time) {
+    public static Callable<?> waiter(double time) {
         return () -> {
             TimeUnit.MILLISECONDS.sleep((long)(time * 1000));
             return 0;

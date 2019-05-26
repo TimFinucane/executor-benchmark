@@ -26,31 +26,18 @@ public abstract class Dispatcher {
      * NOTE: totalTasks could be removed if necessary, its a big help but it isn't required for performing local metrics
      */
     public Dispatcher(int totalTasks) {
-        this(totalTasks, null);
-    }
-
-    public Dispatcher(int totalTasks, List<DispatchListener> dispatchListeners) {
         this.localMetrics = new LocalMetrics.Builder(totalTasks);
-        this.dispatchListeners = dispatchListeners == null ? new ArrayList<>(): dispatchListeners;
     }
 
     public Metrics run(ExecutorService service) {
+        // Set service so that we can process calls to this::dispatch
         this.service = service;
-        Metrics metrics = new Metrics();
-        GlobalMetrics globalMetrics = new GlobalMetrics();
 
-        long startTime = System.nanoTime();
-        this.watcherThread = new Thread(() -> {
-            while(notShutDown) {
-                globalMetrics.start();
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        // Start gathering global metrics
+        GlobalMetrics.Builder globalMetrics = new GlobalMetrics.Builder();
+        globalMetrics.start();
 
+        // Dispatch our profile's tasks, and wait until they're finished
         dispatchAllAndWait();
         service.shutdown();
         try {
@@ -58,17 +45,14 @@ public abstract class Dispatcher {
         } catch(InterruptedException e) {
             System.out.println("System was interrupted from waiting for termination!");
         }
-        long endTime = System.nanoTime();
-        globalMetrics.end();
-        for (DispatchListener listener : dispatchListeners) { // Notify listeners dispatch is complete
-            listener.finishedDispatch();
-        }
-
-        // Gather metrics together
-        metrics.local = localMetrics.build();
-        metrics.totalTime = (endTime - startTime) / (double) TimeUnit.SECONDS.toNanos(1);
+        // Stop gathering global metrics
+        globalMetrics.finish();
 
         this.service = null;
+
+        Metrics metrics = new Metrics();
+        metrics.local = localMetrics.build();
+        metrics.global = globalMetrics.build();
         return metrics;
     }
 
@@ -97,8 +81,6 @@ public abstract class Dispatcher {
     // Next task index to be created. Does not indicate which tasks are completed.
     private AtomicInteger currentTask = new AtomicInteger(0);
     private LocalMetrics.Builder localMetrics;
-    private List<DispatchListener> dispatchListeners;
-    private Thread watcherThread;
+
     private ExecutorService service;
-    private Boolean notShutDown;
 }

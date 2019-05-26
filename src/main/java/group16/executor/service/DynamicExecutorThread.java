@@ -14,7 +14,7 @@ public class DynamicExecutorThread extends Thread {
     public void run() {
         // TODO: make this continue until stopped.
         try {
-            taskManager.nextTask().call();
+            // TODO: taskManager.nextTask().call();
         } catch (Exception e) {
             System.out.println("Task threw exception at DynamicExecutorService thread level:");
             e.printStackTrace();
