@@ -1,5 +1,6 @@
 package group16.executor.benchmark.helpers;
 
+import group16.executor.benchmark.metrics.GlobalMetrics;
 import group16.executor.benchmark.metrics.LocalMetrics;
 import group16.executor.benchmark.metrics.Metrics;
 import group16.executor.benchmark.profiles.DispatchListener;
@@ -35,12 +36,21 @@ public abstract class Dispatcher {
 
     public Metrics run(ExecutorService service) {
         this.service = service;
-        // TODO: Here is where global metrics would go
         Metrics metrics = new Metrics();
-        OperatingSystemMXBean bean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        GlobalMetrics globalMetrics = new GlobalMetrics();
 
         long startTime = System.nanoTime();
-        long cpuBefore = bean.getProcessCpuTime();
+        this.watcherThread = new Thread(() -> {
+            while(notShutDown) {
+                globalMetrics.start();
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         dispatchAllAndWait();
         service.shutdown();
         try {
@@ -48,16 +58,8 @@ public abstract class Dispatcher {
         } catch(InterruptedException e) {
             System.out.println("System was interrupted from waiting for termination!");
         }
-        long cpuAfter = bean.getProcessCpuTime();
         long endTime = System.nanoTime();
-        long percent;
-        if (endTime > startTime)
-            percent = ((cpuAfter-cpuBefore)*100L)/
-                    (endTime-startTime);
-        else percent = 0;
-        int numberOfProcessors = Runtime.getRuntime().availableProcessors();
-        percent = percent/numberOfProcessors;
-        metrics.CPUUtilization = percent;
+        globalMetrics.end();
         for (DispatchListener listener : dispatchListeners) { // Notify listeners dispatch is complete
             listener.finishedDispatch();
         }
@@ -96,6 +98,7 @@ public abstract class Dispatcher {
     private AtomicInteger currentTask = new AtomicInteger(0);
     private LocalMetrics.Builder localMetrics;
     private List<DispatchListener> dispatchListeners;
-
+    private Thread watcherThread;
     private ExecutorService service;
+    private Boolean notShutDown;
 }
