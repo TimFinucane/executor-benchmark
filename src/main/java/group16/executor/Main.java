@@ -16,9 +16,11 @@ public class Main {
     public static void main(String[] args) {
 
         try {
-            Dispatcher dispatcher = new UniformProfile(10000, 1000000, 10) .generate();
+            Dispatcher dispatcher = new UniformProfile(10000, 1000000, 10).generate();
             ExecutorService defaultService = Executors.newFixedThreadPool(4);
             Metrics metrics = dispatcher.run(defaultService);
+            metrics.profileType = "Uniform Profile";
+            metrics.serviceType = "Fixed Thread Pool";
             MetricsExporter exporter = new JsonMetricsExporter();
             exporter.exportMetrics(metrics);
 //            for(int i = 0; i < 10; ++i) {
@@ -44,53 +46,8 @@ public class Main {
 //                System.out.println("\tMax request completion time: " + metrics.local.maxCompletionTime());
 //                System.out.println("\tAverage CPU load: " + metrics.global.averageCpuLoad());
 //            }
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    // TODO: Put this and LoadSimulator somewhere else?
-    public static Metrics dispatchWithLoad(Dispatcher dispatcher, ExecutorService service) {
-        LoadSimulator loadSimulator = new LoadSimulator();
-        loadSimulator.start(5);
-
-        Metrics metrics = dispatcher.run(service);
-
-        loadSimulator.stop();
-
-        return metrics;
-    }
-
-    /**
-     * Class that creates boring threads for a load
-     */
-    public static class LoadSimulator {
-
-        /**
-         * Starts running [count] simultaneous threads with load
-         */
-        public void start(int count) {
-            // Create a thread pool and schedule [count] work tasks
-            ExecutorService service = Executors.newFixedThreadPool(count);
-            for(int i = 0; i < count; ++i) {
-                service.submit(this::work);
-            }
-            service.shutdown();
-        }
-        public void stop() {
-            shutdown.set(true);
-        }
-
-        // Generic work function.
-        private void work() {
-            while(!shutdown.get()) {
-                try {
-                    ProfileBuilder.calculator(10000).call();
-                } catch(Exception e) {}
-            }
-        }
-
-        // For some reason never stops with a regular boolean.
-        private AtomicBoolean shutdown = new AtomicBoolean(false);
     }
 }

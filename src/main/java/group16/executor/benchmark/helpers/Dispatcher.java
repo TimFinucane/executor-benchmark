@@ -3,16 +3,11 @@ package group16.executor.benchmark.helpers;
 import group16.executor.benchmark.metrics.GlobalMetrics;
 import group16.executor.benchmark.metrics.LocalMetrics;
 import group16.executor.benchmark.metrics.Metrics;
-import group16.executor.benchmark.profiles.DispatchListener;
 
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.sun.management.OperatingSystemMXBean;
 
 /**
  * A dispatcher controls the submitting of tasks to an ExecutorService, whilst gathering metrics about the tasks.

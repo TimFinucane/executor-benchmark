@@ -1,6 +1,5 @@
 package group16.executor.benchmark.helpers;
 
-import group16.executor.benchmark.profiles.DispatchListener;
 import org.apache.commons.math3.util.Pair;
 
 import java.util.ArrayList;
