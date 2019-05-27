@@ -2,7 +2,6 @@ package group16.executor.benchmark.metrics;
 
 import java.lang.management.ManagementFactory;
 import com.sun.management.OperatingSystemMXBean;
-import javafx.concurrent.Task;
 
 import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
@@ -37,9 +36,7 @@ public class GlobalMetrics
         public GlobalMetrics build() {
             return new GlobalMetrics(
                 totalTime / (double)TimeUnit.SECONDS.toNanos(1),
-                times,
-                cpuLoads,
-                threadCounts,
+                globalDataSamples,
                 responsiveThreadTimeIntervals
             );
         }
@@ -83,8 +80,6 @@ public class GlobalMetrics
 
         private void gatherMetrics() {
             // TODO: Could split this up if so desired
-            // Time
-            times.add(System.nanoTime());
             /**
              * Although there seems to be various methods available to get the CPU Utilization with varying accuracies, this seems the
              * most accepted method to getthe CPU utilization of the JVM process from the OS. getProcessCpuLoad() Returns the "recent cpu usage"
@@ -95,11 +90,11 @@ public class GlobalMetrics
              * of the activities going on in the JVM process and the whole system. If the Java Virtual Machine recent CPU usage is not
              * available, the method returns a negative value.
              */
-            // CPU load
-            cpuLoads.add(osBean.getProcessCpuLoad() * 100.0);
-            // Get thread count
+            long systemTime = System.nanoTime();
+            double cpuLoad = osBean.getProcessCpuLoad() * 100.0;
             ThreadMXBean osBean = ManagementFactory.getThreadMXBean();
-            threadCounts.add(osBean.getThreadCount());
+            int threadCount = osBean.getThreadCount();
+            globalDataSamples.add(new GlobalDataSample(systemTime, cpuLoad, threadCount));
         }
 
         // Wait time in ms between getting measurements
@@ -110,32 +105,25 @@ public class GlobalMetrics
         private boolean shutdown = false;
 
         private long totalTime;
-        private ArrayList<Long> times = new ArrayList<>();
-        private ArrayList<Double> cpuLoads = new ArrayList<>();
-        private ArrayList<Integer> threadCounts = new ArrayList<>();
         private ArrayList<Long> responsiveThreadTimeIntervals = new ArrayList<>();
+        private ArrayList<GlobalDataSample> globalDataSamples = new ArrayList<>();
     }
 
 
 
 
-    public GlobalMetrics(double totalTime, List<Long> times, List<Double> cpuLoads, List<Integer> threadCounts, List<Long> responsiveThreadTimeIntervals) {
+    public GlobalMetrics(double totalTime, List<GlobalDataSample> globalDataSamples, List<Long> responsiveThreadTimeIntervals) {
         this.totalTime = totalTime;
-        this.times = times;
-        this.cpuLoads = cpuLoads;
-        this.threadCounts = threadCounts;
+        this.globalDataSamples = globalDataSamples;
         this.responsiveThreadTimeIntervals = responsiveThreadTimeIntervals;
     }
 
     public double averageCpuLoad() {
-        return cpuLoads.stream().mapToDouble(val -> val).average().orElse(-1);
+        return globalDataSamples.stream().map(x -> x.cpuLoad).mapToDouble(val -> val).average().orElse(-1);
     }
 
     public final double totalTime;
-
-    // Times in nanos since epoch at which each reading was performed
-    public final List<Long> times;
-    public final List<Double> cpuLoads;
-    public final List<Integer> threadCounts;
+    public final List<GlobalDataSample> globalDataSamples;
     public final List<Long> responsiveThreadTimeIntervals;
+
 }

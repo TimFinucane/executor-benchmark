@@ -10,25 +10,25 @@ public class LocalMetrics {
     public static class Builder {
         public Builder(int totalTasks) {
             this.totalTasks = totalTasks;
-            this.completionTimes = new long[totalTasks];
+            this.taskCompletionTimes = new long[totalTasks];
         }
 
         public void onTaskSubmitted(int task) {
-            completionTimes[task] = System.nanoTime();
+            taskCompletionTimes[task] = System.nanoTime();
         }
         public void onTaskStarted(int task) {
 
         }
         public void onTaskCompleted(int task) {
-            completionTimes[task] = System.nanoTime() - completionTimes[task];
+            taskCompletionTimes[task] = System.nanoTime() - taskCompletionTimes[task];
         }
 
         public LocalMetrics build() {
             LocalMetrics metrics = new LocalMetrics();
 
             metrics.totalTasks = totalTasks;
-            metrics.completionTimes =
-                Arrays.stream(completionTimes)
+            metrics.taskCompletionTimes =
+                Arrays.stream(taskCompletionTimes)
                 .mapToDouble(time -> time / (double)TimeUnit.SECONDS.toNanos(1))
                 .toArray();
 
@@ -36,26 +36,26 @@ public class LocalMetrics {
         }
 
         public int totalTasks;
-        public long[] completionTimes;
+        public long[] taskCompletionTimes;
     }
 
     private LocalMetrics() {}
 
-    public double[] getCompletionTimes() {
+    public double[] getTaskCompletionTimes() {
         // TODO: We would clone this if that wasn't so silly
-        return completionTimes;
+        return taskCompletionTimes;
     }
     public double maxCompletionTime() {
-        return Arrays.stream(completionTimes).max().orElse(-1.0);
+        return Arrays.stream(taskCompletionTimes).max().orElse(-1.0);
     }
     public double averageCompletionTime() {
-        return Arrays.stream(completionTimes).average().orElse(-1.0);
+        return Arrays.stream(taskCompletionTimes).average().orElse(-1.0);
     }
 
     public int getTotalTasks() {
         return totalTasks;
     }
 
-    private double[] completionTimes;
+    private double[] taskCompletionTimes;
     private int totalTasks;
 }
