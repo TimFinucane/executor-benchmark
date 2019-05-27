@@ -20,7 +20,11 @@ public class JsonMetricsExporter implements MetricsExporter {
             directory.mkdir();
         }
         try {
-            gson.toJson(metrics, new FileWriter(Paths.get(directory.toString(), fileName).toString()));
+            // Can't use gson.toJson(obj, FileWriter) because gson seems to cut it off prematurely? odd bug.
+            String asString = gson.toJson(metrics);
+            FileWriter fw=new FileWriter(Paths.get(directory.toString(), fileName).toString());
+            fw.write(asString);
+            fw.close();
         } catch (IOException e) {
             System.out.println("Error while exporting metrics as JSON");
             e.printStackTrace();
