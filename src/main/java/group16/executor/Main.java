@@ -19,8 +19,8 @@ public class Main {
             Dispatcher dispatcher = new UniformProfile(10000, 1000000, 10).generate();
             ExecutorService defaultService = Executors.newFixedThreadPool(4);
             Metrics metrics = dispatcher.run(defaultService);
-            metrics.profileType = "Uniform Profile";
-            metrics.serviceType = "Fixed Thread Pool";
+            metrics.profileType = "UniformProfile";
+            metrics.serviceType = "FixedThreadPool";
             MetricsExporter exporter = new JsonMetricsExporter();
             exporter.exportMetrics(metrics);
 //            for(int i = 0; i < 10; ++i) {

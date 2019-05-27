@@ -14,7 +14,8 @@ public class JsonMetricsExporter implements MetricsExporter {
     @Override
     public void exportMetrics(Metrics metrics) {
         Gson gson = new Gson();
-        String fileName = new SimpleDateFormat("yyy-MM-dd-HHmmss'.json'").format(new Date());
+        String fileName = metrics.serviceType + "-" + metrics.profileType + "-" +
+                new SimpleDateFormat("yyy-MM-dd-HHmmss'.json'").format(new Date());
         File directory = new File(Paths.get(System.getProperty("user.dir"), "metrics").toString());
         if (! directory.exists()){
             directory.mkdir();
