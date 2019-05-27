@@ -2,6 +2,7 @@ package group16.executor.benchmark.metrics;
 
 import java.lang.management.ManagementFactory;
 import com.sun.management.OperatingSystemMXBean;
+import group16.executor.benchmark.ProfileBuilder;
 
 import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
@@ -55,17 +56,8 @@ public class GlobalMetrics
 
         private void runResponsivenessThread() {
             while (!shutdown) {
-                Callable c = () -> {
-                    double sum = 0;
-                    double factorial = 1;
-                    for (int i = 0; i < RESPONSIVENESS_THREAD_ITERATIONS; i++) {
-                        sum += 1 / factorial;
-                        factorial *= i + 1;
-                    }
-                    return sum;
-                };
                 try {
-                    c.call();
+                    ProfileBuilder.calculator(RESPONSIVENESS_THREAD_WORKLOAD).call();
                 } catch (Exception e) {
                     System.out.println("Exception thrown while running responsiveness thread work simulation");
                     e.printStackTrace();
@@ -96,7 +88,7 @@ public class GlobalMetrics
 
         // Wait time in ms between getting measurements
         private static final long RESOLUTION = 500;
-        private static final int RESPONSIVENESS_THREAD_ITERATIONS = 1000000;
+        private static final int RESPONSIVENESS_THREAD_WORKLOAD = 100000;
         private static final OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
 
         private boolean shutdown = false;
