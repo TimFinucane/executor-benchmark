@@ -1,5 +1,7 @@
 package group16.executor;
 
+import group16.executor.benchmark.JsonMetricsExporter;
+import group16.executor.benchmark.MetricsExporter;
 import group16.executor.benchmark.ProfileBuilder;
 import group16.executor.benchmark.helpers.Dispatcher;
 import group16.executor.benchmark.metrics.Metrics;
@@ -27,7 +29,9 @@ public class Main {
             System.out.println("Max request completion time: " + metrics.local.maxCompletionTime());
 
             System.out.println("Average CPU load: " + metrics.global.averageCpuLoad());
-            
+
+            MetricsExporter exporter = new JsonMetricsExporter();
+            exporter.exportMetrics(metrics);
         } catch(Exception e) {
             e.printStackTrace();
         }
