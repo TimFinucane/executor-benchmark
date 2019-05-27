@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GlobalMetrics
 {
@@ -36,8 +37,7 @@ public class GlobalMetrics
         public GlobalMetrics build() {
             return new GlobalMetrics(
                 totalTime / (double)TimeUnit.SECONDS.toNanos(1),
-                globalDataSamples,
-                responsiveThreadTimeIntervals
+                globalDataSamples
             );
         }
 
@@ -54,7 +54,6 @@ public class GlobalMetrics
         }
 
         private void runResponsivenessThread() {
-            long previousTime = System.nanoTime();
             while (!shutdown) {
                 Callable c = () -> {
                     double sum = 0;
@@ -72,9 +71,7 @@ public class GlobalMetrics
                     e.printStackTrace();
                 }
 
-                long currentTime = System.nanoTime();
-                responsiveThreadTimeIntervals.add(currentTime - previousTime);
-                previousTime = currentTime;
+                responsiveWorkDone.incrementAndGet();
             }
         }
 
@@ -94,7 +91,7 @@ public class GlobalMetrics
             double cpuLoad = osBean.getProcessCpuLoad() * 100.0;
             ThreadMXBean osBean = ManagementFactory.getThreadMXBean();
             int threadCount = osBean.getThreadCount();
-            globalDataSamples.add(new GlobalDataSample(systemTime, cpuLoad, threadCount));
+            globalDataSamples.add(new GlobalDataSample(systemTime, cpuLoad, threadCount, responsiveWorkDone.getAndSet(0)));
         }
 
         // Wait time in ms between getting measurements
@@ -105,17 +102,16 @@ public class GlobalMetrics
         private boolean shutdown = false;
 
         private long totalTime;
-        private ArrayList<Long> responsiveThreadTimeIntervals = new ArrayList<>();
         private ArrayList<GlobalDataSample> globalDataSamples = new ArrayList<>();
+        private AtomicInteger responsiveWorkDone = new AtomicInteger(0); // Fine to have atomic here as contention will be very low
     }
 
 
 
 
-    public GlobalMetrics(double totalTime, List<GlobalDataSample> globalDataSamples, List<Long> responsiveThreadTimeIntervals) {
+    public GlobalMetrics(double totalTime, List<GlobalDataSample> globalDataSamples) {
         this.totalTime = totalTime;
         this.globalDataSamples = globalDataSamples;
-        this.responsiveThreadTimeIntervals = responsiveThreadTimeIntervals;
     }
 
     public double averageCpuLoad() {
@@ -124,6 +120,4 @@ public class GlobalMetrics
 
     public final double totalTime;
     public final List<GlobalDataSample> globalDataSamples;
-    public final List<Long> responsiveThreadTimeIntervals;
-
 }
