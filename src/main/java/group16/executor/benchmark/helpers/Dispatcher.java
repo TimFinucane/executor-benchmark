@@ -26,12 +26,14 @@ public abstract class Dispatcher {
      * NOTE: totalTasks could be removed if necessary, its a big help but it isn't required for performing local metrics
      */
     public Dispatcher(int totalTasks) {
-        this.localMetrics = new LocalMetrics.Builder(totalTasks);
+        this.totalTasks = totalTasks;
     }
 
     public Metrics run(ExecutorService service) {
         // Set service so that we can process calls to this::dispatch
         this.service = service;
+        this.currentTask.set(0);
+        this.localMetrics = new LocalMetrics.Builder(totalTasks);
 
         // Start gathering global metrics
         GlobalMetrics.Builder globalMetrics = new GlobalMetrics.Builder();
@@ -78,6 +80,7 @@ public abstract class Dispatcher {
         });
     }
 
+    private int totalTasks;
     // Next task index to be created. Does not indicate which tasks are completed.
     private AtomicInteger currentTask = new AtomicInteger(0);
     private LocalMetrics.Builder localMetrics;
