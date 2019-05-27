@@ -21,7 +21,8 @@ public class GlobalMetrics
          */
         public void start() {
             totalTime = System.nanoTime();
-            new Thread(this::runThread).start();
+            new Thread(this::runGatherMetricsThread).start();
+            // TODO start responsiveness thread in another method, in that thread do work and write to the data periodically
         }
 
         /**
@@ -40,7 +41,7 @@ public class GlobalMetrics
             );
         }
 
-        private void runThread() {
+        private void runGatherMetricsThread() {
             try {
                 while (!shutdown) {
                     gatherMetrics();
