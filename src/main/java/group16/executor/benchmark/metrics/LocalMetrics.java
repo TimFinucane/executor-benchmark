@@ -10,52 +10,54 @@ public class LocalMetrics {
     public static class Builder {
         public Builder(int totalTasks) {
             this.totalTasks = totalTasks;
-            this.taskCompletionTimes = new long[totalTasks];
+            this.taskStartTimes = new long[totalTasks];
+            this.taskDataSamples = new TaskDataSample[totalTasks];
         }
 
         public void onTaskSubmitted(int task) {
-            taskCompletionTimes[task] = System.nanoTime();
+            taskStartTimes[task] = System.nanoTime();
         }
         public void onTaskStarted(int task) {
 
         }
         public void onTaskCompleted(int task) {
-            taskCompletionTimes[task] = System.nanoTime() - taskCompletionTimes[task];
+            taskDataSamples[task] = new TaskDataSample(
+                    taskStartTimes[task],
+                    (System.nanoTime() - taskStartTimes[task]) / (double)TimeUnit.SECONDS.toNanos(1));
         }
 
         public LocalMetrics build() {
             LocalMetrics metrics = new LocalMetrics();
 
             metrics.totalTasks = totalTasks;
-            metrics.taskCompletionTimes =
-                Arrays.stream(taskCompletionTimes)
-                .mapToDouble(time -> time / (double)TimeUnit.SECONDS.toNanos(1))
-                .toArray();
+            metrics.taskDataSamples = taskDataSamples;
 
             return metrics;
         }
 
         public int totalTasks;
-        public long[] taskCompletionTimes;
+        public long[] taskStartTimes;
+        public TaskDataSample[] taskDataSamples;
     }
 
     private LocalMetrics() {}
 
     public double[] getTaskCompletionTimes() {
         // TODO: We would clone this if that wasn't so silly
-        return taskCompletionTimes;
+        return Arrays.stream(taskDataSamples).map(x -> x.taskCompletionTime).mapToDouble(v -> v).toArray();
     }
     public double maxCompletionTime() {
-        return Arrays.stream(taskCompletionTimes).max().orElse(-1.0);
+        return Arrays.stream(taskDataSamples).map(x -> x.taskCompletionTime).mapToDouble(v -> v).max().orElse(-1.0);
     }
     public double averageCompletionTime() {
-        return Arrays.stream(taskCompletionTimes).average().orElse(-1.0);
+        return Arrays.stream(taskDataSamples).map(x -> x.taskCompletionTime).mapToDouble(v -> v).average().orElse(-1.0);
     }
 
     public int getTotalTasks() {
         return totalTasks;
     }
 
-    private double[] taskCompletionTimes;
+    //private double[] taskStartTimes;
     private int totalTasks;
+    private TaskDataSample[] taskDataSamples;
 }
