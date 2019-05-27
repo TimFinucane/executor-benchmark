@@ -1,5 +1,6 @@
 package group16.executor.service;
 
+import group16.executor.service.task.management.FixedQueueTaskManager;
 import group16.executor.service.task.management.NonEmptyRoundRobinTaskManager;
 import group16.executor.service.task.management.TaskManager;
 
@@ -9,11 +10,19 @@ import java.util.Queue;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class DynamicExecutorService extends AbstractExecutorService {
 
-    public DynamicExecutorService(int numberOfThreads, int numberOfQueues, int sampleRate) {
-        this.sampleRate = sampleRate;
+    public DynamicExecutorService() {
+        this.taskManager = new FixedQueueTaskManager(4);
+
+        this.threads = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            this.threads.add(new Thread(this::runThread));
+            this.threads.get(i).start();
+        }
 
         // Set up watcher thread for counting tasks per time unit
         // TODO: We should find a way of doing this in LocalMetrics or GlobalMetrics instead. (e.g. query service.numTasks() or something)
@@ -30,13 +39,6 @@ public class DynamicExecutorService extends AbstractExecutorService {
             }
         });
         this.watcherThread.start();
-
-        this.taskManager = new NonEmptyRoundRobinTaskManager(numberOfQueues);
-        this.threads = new ArrayList<>();
-        for (int i = 0; i < numberOfThreads; i++) {
-            this.threads.add(new Thread(this::runThread));
-
-        }
     }
 
     @Override
@@ -51,31 +53,42 @@ public class DynamicExecutorService extends AbstractExecutorService {
 
     @Override
     public boolean isShutdown() {
-        return false; // TODO:
+        return shutdown.get();
     }
 
     @Override
     public boolean isTerminated() {
-        return false; // TODO:
+        return activeThreads.get() == 0 && shutdown.get();
     }
 
     @Override
     public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-        return false; // TODO:
+        shutdown();
+        terminatorLock.lock();
+        try {
+            if(activeThreads.get() > 0)
+                terminator.await();
+        } finally {
+            terminatorLock.unlock();
+        }
+        return true; // ?
     }
 
     @Override
     public void execute(Runnable command) {
-        executionsPerSample.incrementAndGet();
-        taskManager.addTask(command);
+        if(!shutdown.get()) {
+            executionsPerSample.incrementAndGet();
+            taskManager.addTask(command);
+        }
     }
 
     private void runThread() {
         int threadId = (int)Thread.currentThread().getId();
 
+        activeThreads.incrementAndGet();
         taskManager.addThread(threadId);
         try {
-            while (shutdown.get() && taskManager.remainingTasks() == 0) {
+            while (!shutdown.get() || taskManager.remainingTasks() > 0) {
                 // TODO: Check other reasons that could make us shut down
 
                 Runnable task = taskManager.nextTask(10, TimeUnit.MILLISECONDS);
@@ -84,9 +97,16 @@ public class DynamicExecutorService extends AbstractExecutorService {
                 task.run();
             }
         } catch(InterruptedException e) {
-
+            System.out.println(e);
         } finally {
             taskManager.removeThread(threadId);
+            terminatorLock.lock();
+            try {
+                if (activeThreads.decrementAndGet() == 0 && isShutdown())
+                    terminator.signalAll();
+            } finally {
+                terminatorLock.unlock();
+            }
         }
     }
 
@@ -98,4 +118,8 @@ public class DynamicExecutorService extends AbstractExecutorService {
 
     private AtomicInteger executionsPerSample = new AtomicInteger(0);
     private AtomicBoolean shutdown = new AtomicBoolean(false);
+    private AtomicInteger activeThreads = new AtomicInteger(0);
+
+    private ReentrantLock terminatorLock = new ReentrantLock();
+    private Condition terminator = terminatorLock.newCondition();
 }
