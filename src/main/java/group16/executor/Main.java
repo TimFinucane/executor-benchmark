@@ -27,7 +27,7 @@ public class Main {
             System.out.println("Max request completion time: " + metrics.local.maxCompletionTime());
 
             System.out.println("Average CPU load: " + metrics.global.averageCpuLoad());
-
+            
         } catch(Exception e) {
             e.printStackTrace();
         }

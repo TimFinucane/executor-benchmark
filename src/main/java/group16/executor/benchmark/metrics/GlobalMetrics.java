@@ -2,10 +2,12 @@ package group16.executor.benchmark.metrics;
 
 import java.lang.management.ManagementFactory;
 import com.sun.management.OperatingSystemMXBean;
+import javafx.concurrent.Task;
 
 import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 public class GlobalMetrics
@@ -22,7 +24,7 @@ public class GlobalMetrics
         public void start() {
             totalTime = System.nanoTime();
             new Thread(this::runGatherMetricsThread).start();
-            // TODO start responsiveness thread in another method, in that thread do work and write to the data periodically
+            new Thread(this::runResponsivenessThread).start();
         }
 
         /**
@@ -37,7 +39,8 @@ public class GlobalMetrics
                 totalTime / (double)TimeUnit.SECONDS.toNanos(1),
                 times,
                 cpuLoads,
-                threadCounts
+                threadCounts,
+                responsiveThreadTimeIntervals
             );
         }
 
@@ -48,6 +51,33 @@ public class GlobalMetrics
                     Thread.sleep(RESOLUTION);
                 }
             } catch (InterruptedException e) {
+                System.out.println("Exception thrown while sleeping between metrics gathering period");
+                e.printStackTrace();
+            }
+        }
+
+        private void runResponsivenessThread() {
+            long previousTime = System.nanoTime();
+            while (!shutdown) {
+                Callable c = () -> {
+                    double sum = 0;
+                    double factorial = 1;
+                    for (int i = 0; i < RESPONSIVENESS_THREAD_ITERATIONS; i++) {
+                        sum += 1 / factorial;
+                        factorial *= i + 1;
+                    }
+                    return sum;
+                };
+                try {
+                    c.call();
+                } catch (Exception e) {
+                    System.out.println("Exception thrown while running responsiveness thread work simulation");
+                    e.printStackTrace();
+                }
+
+                long currentTime = System.nanoTime();
+                responsiveThreadTimeIntervals.add(currentTime - previousTime);
+                previousTime = currentTime;
             }
         }
 
@@ -74,6 +104,7 @@ public class GlobalMetrics
 
         // Wait time in ms between getting measurements
         private static final long RESOLUTION = 500;
+        private static final int RESPONSIVENESS_THREAD_ITERATIONS = 1000000;
         private static final OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
 
         private boolean shutdown = false;
@@ -82,16 +113,18 @@ public class GlobalMetrics
         private ArrayList<Long> times = new ArrayList<>();
         private ArrayList<Double> cpuLoads = new ArrayList<>();
         private ArrayList<Integer> threadCounts = new ArrayList<>();
+        private ArrayList<Long> responsiveThreadTimeIntervals = new ArrayList<>();
     }
 
 
 
 
-    public GlobalMetrics(double totalTime, List<Long> times, List<Double> cpuLoads, List<Integer> threadCounts) {
+    public GlobalMetrics(double totalTime, List<Long> times, List<Double> cpuLoads, List<Integer> threadCounts, List<Long> responsiveThreadTimeIntervals) {
         this.totalTime = totalTime;
         this.times = times;
         this.cpuLoads = cpuLoads;
         this.threadCounts = threadCounts;
+        this.responsiveThreadTimeIntervals = responsiveThreadTimeIntervals;
     }
 
     public double averageCpuLoad() {
@@ -104,4 +137,5 @@ public class GlobalMetrics
     public final List<Long> times;
     public final List<Double> cpuLoads;
     public final List<Integer> threadCounts;
+    public final List<Long> responsiveThreadTimeIntervals;
 }
