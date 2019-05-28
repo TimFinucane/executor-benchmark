@@ -1,15 +1,16 @@
-package group16.executor.service.thread.prediction;
+package group16.executor.service.thread.management;
 
-public class ExponentialMovingAveragePredictor implements FuturePredictor {
+import java.util.AbstractMap;
+import java.util.List;
 
-    private final double alpha;
-
-    private Double lastAverage;
-
+/**
+ * Predicts next number of tasks based on the past number of tasks and the current rate of change.
+ */
+public class EmaThreadPredictor implements ThreadManager {
     /**
      * @param alpha Weighting factor for exponential weighting reduction
      */
-    public ExponentialMovingAveragePredictor(double alpha) {
+    public EmaThreadPredictor(double alpha) {
         this.alpha = alpha;
     }
 
@@ -22,6 +23,7 @@ public class ExponentialMovingAveragePredictor implements FuturePredictor {
      * @param newValue A value to predict from
      * @return Predicted value based on exponential moving average
      */
+    /* TODO:
     @Override
     public int predict(int newValue) {
         if (lastAverage == null) {
@@ -36,5 +38,37 @@ public class ExponentialMovingAveragePredictor implements FuturePredictor {
         lastAverage = nextAverage;
 
         return (int) Math.round(toReturn);
+    }*/
+
+    @Override
+    public void taskAdded() {
+        long time = System.currentTimeMillis();
     }
+
+    @Override
+    public void taskCompleted() {
+
+    }
+
+    @Override
+    public int threadDeficit(int activeThreads) {
+        return 0;
+    }
+
+    @Override
+    public boolean shouldKillIdleThread(int activeThreads, long idleTime) {
+        return false;
+    }
+
+    @Override
+    public boolean shouldKillThread(int activeThreads) {
+        return false;
+    }
+
+    private final double alpha;
+    private double lastPrediction = 0.0;
+    private double predictedTasks = 0.0;
+    private double rateOfChange = 0.0;
+
+    private List<AbstractMap.SimpleImmutableEntry<Long, Integer>> threadCounts;
 }

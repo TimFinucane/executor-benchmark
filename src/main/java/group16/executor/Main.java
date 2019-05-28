@@ -17,12 +17,18 @@ public class Main {
 
         try {
             Dispatcher dispatcher = new UniformProfile(10000, 1000000, 10).generate();
-            ExecutorService defaultService = Executors.newFixedThreadPool(4);
+            ExecutorService defaultService = new DynamicExecutorService(); // Executors.newFixedThreadPool(4);
             Metrics metrics = dispatcher.run(defaultService);
+
+            // Export the metrics
             metrics.profileType = "UniformProfile";
             metrics.serviceType = "FixedThreadPool";
             MetricsExporter exporter = new JsonMetricsExporter();
             exporter.exportMetrics(metrics);
+
+            // Print metrics info
+            printMetrics(metrics);
+
 //            for(int i = 0; i < 10; ++i) {
 //                ExecutorService defaultService = Executors.newFixedThreadPool(4);
 //                ExecutorService ourService = new DynamicExecutorService();
@@ -49,5 +55,13 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    static void printMetrics(Metrics metrics) {
+        System.out.println("Running " + metrics.serviceType + " on " + metrics.profileType);
+        System.out.println("\tTime to run: " + metrics.global.totalTime + "s");
+        System.out.println("\tAvg. request completion time: " + metrics.local.averageCompletionTime());
+        System.out.println("\tMax request completion time: " + metrics.local.maxCompletionTime());
+        System.out.println("\tAverage CPU load: " + metrics.global.averageCpuLoad());
     }
 }

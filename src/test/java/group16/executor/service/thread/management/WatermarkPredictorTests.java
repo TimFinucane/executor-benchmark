@@ -1,6 +1,5 @@
-package group16.executor.service.thread.prediction;
+package group16.executor.service.thread.management;
 
-import group16.executor.service.thread.prediction.WatermarkPredictor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -9,24 +8,18 @@ public class WatermarkPredictorTests {
     public void watermark_underMin_expectMin() {
         Assert.assertEquals(
             4,
-            new WatermarkPredictor(4, 16).predict(3)
+            new WatermarkPredictor(4, 16).threadDeficit(0)
         );
     }
 
     @Test
     public void watermark_overMax_expectMax() {
-        Assert.assertEquals(
-            16,
-            new WatermarkPredictor(4, 28).predict(18)
-        );
+        Assert.assertTrue(new WatermarkPredictor(4, 8).shouldKillThread(18));
     }
 
     @Test
     public void watermark_betweenMark_expectValue() {
-        Assert.assertEquals(
-            3,
-            new WatermarkPredictor(1, 6).predict(3)
-        );
+        Assert.assertEquals(0, new WatermarkPredictor(1, 6).threadDeficit(3));
     }
 
     @Test
@@ -41,10 +34,7 @@ public class WatermarkPredictorTests {
 
     @Test
     public void watermark_equalValues_ok() {
-        Assert.assertEquals(
-            5,
-            new WatermarkPredictor(5, 5).predict(2)
-        );
+        Assert.assertEquals(0, new WatermarkPredictor(5, 5).threadDeficit(5));
     }
 
     @Test

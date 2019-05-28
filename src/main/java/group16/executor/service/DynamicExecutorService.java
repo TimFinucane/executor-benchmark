@@ -3,6 +3,8 @@ package group16.executor.service;
 import group16.executor.service.task.management.FixedQueueTaskManager;
 import group16.executor.service.task.management.NonEmptyRoundRobinTaskManager;
 import group16.executor.service.task.management.TaskManager;
+import group16.executor.service.thread.management.ThreadManager;
+import group16.executor.service.thread.management.WatermarkPredictor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,7 @@ public class DynamicExecutorService extends AbstractExecutorService {
 
     public DynamicExecutorService() {
         this.taskManager = new FixedQueueTaskManager(4);
+        this.threadManager = new WatermarkPredictor(4, 12);
 
         this.threads = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
@@ -79,6 +82,7 @@ public class DynamicExecutorService extends AbstractExecutorService {
         if(!shutdown.get()) {
             executionsPerSample.incrementAndGet();
             taskManager.addTask(command);
+            threadManager.taskAdded();
         }
     }
 
@@ -88,13 +92,21 @@ public class DynamicExecutorService extends AbstractExecutorService {
         activeThreads.incrementAndGet();
         taskManager.addThread(threadId);
         try {
-            while (!shutdown.get() || taskManager.remainingTasks() > 0) {
+            while (
+                (!shutdown.get() || taskManager.remainingTasks() > 0)
+            || threadManager.shouldKillThread(activeThreads.get())) {
                 // TODO: Check other reasons that could make us shut down
 
                 Runnable task = taskManager.nextTask(10, TimeUnit.MILLISECONDS);
-                if(task == null)
-                    continue; // TODO: We have timed out
-                task.run();
+                if(task == null) {
+                    // TODO: Count multiple idlings
+                    if(threadManager.shouldKillIdleThread(activeThreads.get(), 10))
+                        break;
+                }
+                else {
+                    task.run();
+                    threadManager.taskCompleted();
+                }
             }
         } catch(InterruptedException e) {
             System.out.println(e);
@@ -111,6 +123,8 @@ public class DynamicExecutorService extends AbstractExecutorService {
     }
 
     private TaskManager taskManager;
+    private ThreadManager threadManager;
+
     private List<Thread> threads;
     private Thread watcherThread;
 

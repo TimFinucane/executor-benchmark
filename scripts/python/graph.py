@@ -1,12 +1,14 @@
 import sys
 import json
+
 import matplotlib.pyplot as plt
 
 
 def graph(x, y, xlabel, ylabel):
-    plt.plot(x, y)
+    plt.scatter(x, y)
     plt.ylabel(ylabel)
     plt.xlabel(xlabel)
+
 
 
 def create_metrics_graphs(metrics_set):
@@ -20,6 +22,12 @@ def create_metrics_graphs(metrics_set):
         task_start_times = [(l['taskSubmitTime'] - first_local_sample_time) / 1000000000 for l in local_metrics['taskDataSamples']]
         task_completion_times = [l['taskCompletionTime'] for l in local_metrics['taskDataSamples']]
 
+        plt.hist(task_start_times, bins=1000)
+        plt.show()
+        plt.hist(task_completion_times, bins=1000)
+        plt.show()
+
+        # TODO: This should be a scatter plot
         graph(task_start_times, task_completion_times, 'Time (seconds)', 'Task Completion Time (seconds)')
 
         # Global Plotting
@@ -29,9 +37,9 @@ def create_metrics_graphs(metrics_set):
         thread_counts = [g['threadCount'] for g in global_metrics['globalDataSamples']]
         responsiveness = [g['responsiveWorkCompleted'] for g in global_metrics['globalDataSamples']]
 
-        #graph(sample_times, cpu_loads, 'Time (seconds)', 'CPU Load (%)')
-        #graph(sample_times, thread_counts, 'Time (seconds)', 'Thread Count')
-        #graph(sample_times, responsiveness, 'Time (seconds)', 'Responsiveness')
+        graph(sample_times, cpu_loads, 'Time (seconds)', 'CPU Load (%)')
+        graph(sample_times, thread_counts, 'Time (seconds)', 'Thread Count')
+        graph(sample_times, responsiveness, 'Time (seconds)', 'Responsiveness')
 
         legend.append(metrics['serviceType'] + ' ' + metrics['profileType'])
 
