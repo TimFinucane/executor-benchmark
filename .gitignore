@@ -4,4 +4,4 @@
 
 out/
 build/
-metrics/
+/metrics/
