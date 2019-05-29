@@ -23,19 +23,25 @@ def create_metrics_graphs(metrics_set):
         submit_times = np.array([sample['submitTime'] for sample in task_samples])
         start_times = np.array([sample['startTime'] for sample in task_samples])
         end_times = np.array([sample['endTime'] for sample in task_samples])
-
+        
         plt.title("Start times")
+        plt.ylabel("Number of tasks")
+        plt.xlabel("Start Time (seconds)")
         plt.hist(submit_times, bins=1000)
         plt.show()
-        plt.title("Completion Times")
+        plt.title("Completion Times (From Submittal)")
+        plt.ylabel("Number of tasks")
+        plt.xlabel("Time taken to complete (seconds)")
         plt.hist(end_times - submit_times, bins=1000)
         plt.show()
-        plt.title("Processing Times")
+        plt.title("Processing Times (From Task Start)")
+        plt.ylabel("Number of tasks")
+        plt.xlabel("Time taken to process (seconds)")
         plt.hist(end_times - start_times, bins=1000)
         plt.show()
 
         plt.title("Completion Times vs. Submit times")
-        graph(submit_times, end_times - submit_times, 'Time (seconds)', 'Task Completion Time (seconds)')
+        graph(submit_times, end_times - submit_times, 'Task Start Time (seconds)', 'Task Completion Time (seconds)')
         plt.show()
 
         # Global Plotting
@@ -45,9 +51,9 @@ def create_metrics_graphs(metrics_set):
         thread_counts = [g['threadCount'] for g in global_metrics['globalDataSamples']]
         responsiveness = [g['responsiveWorkCompleted'] for g in global_metrics['globalDataSamples']]
 
-        graph(sample_times, cpu_loads, 'Time (seconds)', 'CPU Load (%)')
-        graph(sample_times, thread_counts, 'Time (seconds)', 'Thread Count')
-        graph(sample_times, responsiveness, 'Time (seconds)', 'Responsiveness')
+        graph(sample_times, cpu_loads, 'Sample Time (seconds)', 'CPU Load (%)')
+        graph(sample_times, thread_counts, 'Sample Time (seconds)', 'Thread Count')
+        graph(sample_times, responsiveness, 'Sample Time (seconds)', 'Responsiveness')
 
         legend.append(metrics['serviceType'] + ' ' + metrics['profileType'])
 
