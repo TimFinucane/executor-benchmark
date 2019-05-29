@@ -38,7 +38,7 @@ public class UniformProfile extends Profile {
 
             for(int i = 0; i < tasks; ++i) {
                 int accuracy = (int)Math.round(randomTaskSize.sample());
-                dispatch.submit(builder.calculator(accuracy));
+                dispatch.submit(ProfileBuilder.calculator(accuracy));
             }
 
             return dispatch;
@@ -49,7 +49,7 @@ public class UniformProfile extends Profile {
 
             for (int i = 0; i < tasks; i++) {
                 int accuracy = (int)Math.round(randomTaskSize.sample());
-                dispatch.submit(builder.calculator(accuracy), waitTimes[i]);
+                dispatch.submit(ProfileBuilder.calculator(accuracy), waitTimes[i]);
             }
 
             return dispatch;

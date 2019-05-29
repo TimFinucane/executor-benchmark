@@ -1,6 +1,7 @@
 import sys
 import json
 
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -18,17 +19,24 @@ def create_metrics_graphs(metrics_set):
         global_metrics = metrics['global']
 
         # Local Plotting
-        first_local_sample_time = local_metrics['taskDataSamples'][0]['taskSubmitTime']
-        task_start_times = [(l['taskSubmitTime'] - first_local_sample_time) / 1000000000 for l in local_metrics['taskDataSamples']]
-        task_completion_times = [l['taskCompletionTime'] for l in local_metrics['taskDataSamples']]
+        task_samples = local_metrics['taskDataSamples']
+        submit_times = np.array([sample['submitTime'] for sample in task_samples])
+        start_times = np.array([sample['startTime'] for sample in task_samples])
+        end_times = np.array([sample['endTime'] for sample in task_samples])
 
-        plt.hist(task_start_times, bins=1000)
+        plt.title("Start times")
+        plt.hist(submit_times, bins=1000)
         plt.show()
-        plt.hist(task_completion_times, bins=1000)
+        plt.title("Completion Times")
+        plt.hist(end_times - submit_times, bins=1000)
+        plt.show()
+        plt.title("Processing Times")
+        plt.hist(end_times - start_times, bins=1000)
         plt.show()
 
-        # TODO: This should be a scatter plot
-        graph(task_start_times, task_completion_times, 'Time (seconds)', 'Task Completion Time (seconds)')
+        plt.title("Completion Times vs. Submit times")
+        graph(submit_times, end_times - submit_times, 'Time (seconds)', 'Task Completion Time (seconds)')
+        plt.show()
 
         # Global Plotting
         first_global_sample = global_metrics['globalDataSamples'][0]['sampleTime']

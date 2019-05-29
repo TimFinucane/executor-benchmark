@@ -11,46 +11,56 @@ public class LocalMetrics {
         public Builder(int totalTasks) {
             this.totalTasks = totalTasks;
             this.taskStartTimes = new long[totalTasks];
-            this.taskDataSamples = new TaskDataSample[totalTasks];
+            this.taskSubmitTimes = new long[totalTasks];
+            this.taskEndTimes = new long[totalTasks];
+            this.programStartTime = System.nanoTime();
         }
 
         public void onTaskSubmitted(int task) {
-            taskStartTimes[task] = System.nanoTime();
+            taskSubmitTimes[task] = System.nanoTime();
         }
         public void onTaskStarted(int task) {
-
+            taskStartTimes[task] = System.nanoTime();
         }
         public void onTaskCompleted(int task) {
-            taskDataSamples[task] = new TaskDataSample(
-                    taskStartTimes[task],
-                    (System.nanoTime() - taskStartTimes[task]) / (double)TimeUnit.SECONDS.toNanos(1));
+            taskEndTimes[task] = System.nanoTime();
         }
 
         public LocalMetrics build() {
-            LocalMetrics metrics = new LocalMetrics();
+            TaskDataSample[] samples = new TaskDataSample[totalTasks];
 
-            metrics.totalTasks = totalTasks;
-            metrics.taskDataSamples = taskDataSamples;
+            for(int i = 0; i < totalTasks; ++i) {
+                samples[i] = new TaskDataSample(
+                        (taskSubmitTimes[i] - programStartTime) / (double)TimeUnit.SECONDS.toNanos(1),
+                        (taskStartTimes[i] - programStartTime) / (double)TimeUnit.SECONDS.toNanos(1),
+                        (taskEndTimes[i] - programStartTime) / (double)TimeUnit.SECONDS.toNanos(1)
+                );
+            }
 
-            return metrics;
+            return new LocalMetrics(totalTasks, samples);
         }
+        long programStartTime;
 
-        public int totalTasks;
-        public long[] taskStartTimes;
-        public TaskDataSample[] taskDataSamples;
+        int totalTasks;
+        long[] taskSubmitTimes;
+        long[] taskStartTimes;
+        long[] taskEndTimes;
     }
 
-    private LocalMetrics() {}
+    public LocalMetrics(int totalTasks, TaskDataSample[] samples) {
+        this.totalTasks = totalTasks;
+        this.taskDataSamples = samples;
+    }
 
     public double[] getTaskCompletionTimes() {
         // TODO: We would clone this if that wasn't so silly
-        return Arrays.stream(taskDataSamples).map(x -> x.taskCompletionTime).mapToDouble(v -> v).toArray();
+        return Arrays.stream(taskDataSamples).map(x -> x.endTime - x.submitTime).mapToDouble(v -> v).toArray();
     }
     public double maxCompletionTime() {
-        return Arrays.stream(taskDataSamples).map(x -> x.taskCompletionTime).mapToDouble(v -> v).max().orElse(-1.0);
+        return Arrays.stream(taskDataSamples).map(x -> x.endTime - x.submitTime).mapToDouble(v -> v).max().orElse(-1.0);
     }
     public double averageCompletionTime() {
-        return Arrays.stream(taskDataSamples).map(x -> x.taskCompletionTime).mapToDouble(v -> v).average().orElse(-1.0);
+        return Arrays.stream(taskDataSamples).map(x -> x.endTime - x.submitTime).mapToDouble(v -> v).average().orElse(-1.0);
     }
 
     public int getTotalTasks() {
@@ -58,6 +68,6 @@ public class LocalMetrics {
     }
 
     //private double[] taskStartTimes;
-    private int totalTasks;
-    private TaskDataSample[] taskDataSamples;
+    public final int totalTasks;
+    public final TaskDataSample[] taskDataSamples;
 }

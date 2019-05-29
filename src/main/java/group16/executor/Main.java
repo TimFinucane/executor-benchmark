@@ -16,7 +16,7 @@ public class Main {
     public static void main(String[] args) {
 
         try {
-            Dispatcher dispatcher = new UniformProfile(10000, 1000000, 10).generate();
+            Dispatcher dispatcher = new UniformProfile(10000, 1000000, 5).generate();
             ExecutorService defaultService = new DynamicExecutorService(); // Executors.newFixedThreadPool(4);
             Metrics metrics = dispatcher.run(defaultService);
 
