@@ -4,6 +4,13 @@ import group16.executor.benchmark.metrics.GlobalMetrics;
 import group16.executor.benchmark.metrics.LocalMetrics;
 import group16.executor.benchmark.metrics.Metrics;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +29,7 @@ public abstract class Dispatcher {
      */
     public Dispatcher(int totalTasks) {
         this.totalTasks = totalTasks;
+        this.callableResults = new ArrayList<>();
     }
 
     public Metrics run(ExecutorService service) {
@@ -45,6 +53,10 @@ public abstract class Dispatcher {
         // Stop gathering global metrics
         globalMetrics.finish();
 
+        System.out.println("Finished! An average value of " + // Actually use the output of the callables because Java
+                callableResults.stream().filter(Objects::nonNull).mapToDouble(v -> v).average().getAsDouble() +
+                " was calculated!");
+
         this.service = null;
 
         Metrics metrics = new Metrics();
@@ -64,7 +76,9 @@ public abstract class Dispatcher {
         service.submit(() -> {
             localMetrics.onTaskStarted(task);
             try {
-                callable.call(); // Why the fuck does this throw Exception?
+                // Not locking the callableResults list is acceptable because we don't care about correctness and we
+                // don't want to impact performance
+                callableResults.add((double) callable.call());
             } catch(Exception e) {
                 System.out.println("Callable threw an exception, clean it up: ");
                 e.printStackTrace();
@@ -79,6 +93,7 @@ public abstract class Dispatcher {
     // Next task index to be created. Does not indicate which tasks are completed.
     private AtomicInteger currentTask = new AtomicInteger(0);
     private LocalMetrics.Builder localMetrics;
+    private List<Double> callableResults;
 
     private ExecutorService service;
 }
