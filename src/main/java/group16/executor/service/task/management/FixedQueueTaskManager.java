@@ -38,7 +38,7 @@ public class FixedQueueTaskManager implements TaskManager {
                 if(activeThreads.get(i).getKey() == threadId)
                     index = i;
                 else if(index > 0)
-                    activeThreads.get(i).getValue().decrementAndGet();
+                    activeThreads.get(i).getValue().accumulateAndGet(-1, (x, y) -> Math.floorMod((x + y), queues.size()));
             }
             activeThreads.remove(index);
         } finally {

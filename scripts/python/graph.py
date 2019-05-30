@@ -9,6 +9,7 @@ def graph(x, y, xlabel, ylabel):
     plt.scatter(x, y)
     plt.ylabel(ylabel)
     plt.xlabel(xlabel)
+    plt.show()
 
 
 
@@ -42,7 +43,7 @@ def create_metrics_graphs(metrics_set):
 
         plt.title("Completion Times vs. Submit times")
         graph(submit_times, end_times - submit_times, 'Task Start Time (seconds)', 'Task Completion Time (seconds)')
-        plt.show()
+        # plt.show()
 
         # Global Plotting
         first_global_sample = global_metrics['globalDataSamples'][0]['sampleTime']
@@ -51,14 +52,15 @@ def create_metrics_graphs(metrics_set):
         thread_counts = [g['threadCount'] for g in global_metrics['globalDataSamples']]
         responsiveness = [g['responsiveWorkCompleted'] for g in global_metrics['globalDataSamples']]
 
+        print(thread_counts)
         graph(sample_times, cpu_loads, 'Sample Time (seconds)', 'CPU Load (%)')
         graph(sample_times, thread_counts, 'Sample Time (seconds)', 'Thread Count')
         graph(sample_times, responsiveness, 'Sample Time (seconds)', 'Responsiveness')
 
         legend.append(metrics['serviceType'] + ' ' + metrics['profileType'])
 
-    plt.legend(legend, loc='lower right')
-    plt.show()
+    # plt.legend(legend, loc='lower right')
+    # plt.show()
 
 
 if __name__ == '__main__':

@@ -19,10 +19,11 @@ public class DynamicExecutorService extends AbstractExecutorService {
 
     public DynamicExecutorService() {
         this.taskManager = new FixedQueueTaskManager(4);
-        this.threadManager = new WatermarkPredictor(4, 12);
+        this.threadManager = new WatermarkPredictor(4, 8);
 
         this.threads = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
+            activeThreads.incrementAndGet();
             this.threads.add(new Thread(this::runThread));
             this.threads.get(i).start();
         }
@@ -80,16 +81,23 @@ public class DynamicExecutorService extends AbstractExecutorService {
     @Override
     public void execute(Runnable command) {
         if(!shutdown.get()) {
-            executionsPerSample.incrementAndGet();
-            taskManager.addTask(command);
             threadManager.taskAdded();
+            taskManager.addTask(command);
+            executionsPerSample.incrementAndGet();
+
+            if(threadManager.threadDeficit(activeThreads.get()) > 0) {
+                activeThreads.incrementAndGet();
+                // Add a thread
+                Thread thread = new Thread(this::runThread);
+                thread.start();
+                threads.add(thread);
+            }
         }
     }
 
     private void runThread() {
         int threadId = (int)Thread.currentThread().getId();
 
-        activeThreads.incrementAndGet();
         taskManager.addThread(threadId);
         try {
             while (
@@ -125,6 +133,7 @@ public class DynamicExecutorService extends AbstractExecutorService {
     private TaskManager taskManager;
     private ThreadManager threadManager;
 
+    // Contains all threads created, including those that are since exited.
     private List<Thread> threads;
     private Thread watcherThread;
 

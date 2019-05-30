@@ -19,8 +19,8 @@ public class WatermarkPredictor implements ThreadManager {
 
     @Override
     public int threadDeficit(int activeThreads) {
-        if(activeThreads < min)
-            return min - activeThreads;
+        if(activeThreads < max)
+            return max - activeThreads;
         else
             return 0;
     }
