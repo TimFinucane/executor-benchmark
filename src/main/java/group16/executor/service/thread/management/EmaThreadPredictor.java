@@ -39,7 +39,7 @@ public class EmaThreadPredictor implements ThreadManager {
 
     @Override
     public int threadDeficit(int activeThreads) {
-        return (int)Math.round(activeThreads - prediction);
+        return (int)Math.round(prediction - activeThreads);
     }
 
     @Override
