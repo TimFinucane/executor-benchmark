@@ -2,6 +2,7 @@ package group16.executor.service.thread.management;
 
 import java.util.AbstractMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Predicts next number of tasks based on the past number of tasks and the current rate of change.
@@ -9,55 +10,39 @@ import java.util.List;
 public class EmaThreadPredictor implements ThreadManager {
     /**
      * @param alpha Weighting factor for exponential weighting reduction
+     * @param minThreads Minimum number of threads
      */
-    public EmaThreadPredictor(double alpha) {
+    public EmaThreadPredictor(double alpha, int minThreads) {
         this.alpha = alpha;
+        this.minThreads = minThreads;
+
+        // TODO: How do we stop this?
+        watcherThread = new Thread(this::watcher);
+        watcherThread.start();
+        prediction = minThreads;
     }
-
-    /**
-     * Predicts the future value needed given previous calls to this method and the Exponential Moving Average
-     * technique. Previous data is weighted exponentially less in a summation to the predicted value given some
-     * weighting/exponential factor alpha. The value returned is also modified using the technique described in:
-     * DongHyun Kang, Saeyoung Han, SeoHee Yoo, and Sungyong Park, “Prediction-Based Dynamic Thread Pool Scheme
-     * for Efficient Resource Usage,” 2008, pp. 159–164. which aims to reduce underestimation.
-     * @param newValue A value to predict from
-     * @return Predicted value based on exponential moving average
-     */
-    /* TODO:
-    @Override
-    public int predict(int newValue) {
-        if (lastAverage == null) {
-            lastAverage = (double) newValue;
-            return newValue;
-        }
-
-        double nextAverage = lastAverage + alpha * (newValue - lastAverage);
-        double toReturn = nextAverage > lastAverage
-                ? newValue + (newValue - nextAverage)
-                : nextAverage;
-        lastAverage = nextAverage;
-
-        return (int) Math.round(toReturn);
-    }*/
+    public EmaThreadPredictor(double alpha) {
+        this(alpha, 4);
+    }
 
     @Override
     public void taskAdded() {
-        long time = System.currentTimeMillis();
+        tasks.incrementAndGet();
     }
 
     @Override
     public void taskCompleted() {
-
+        tasks.decrementAndGet();
     }
 
     @Override
     public int threadDeficit(int activeThreads) {
-        return 0;
+        return (int)Math.round(activeThreads - prediction);
     }
 
     @Override
     public boolean shouldKillIdleThread(int activeThreads, long idleTime) {
-        return false;
+        return activeThreads > prediction;
     }
 
     @Override
@@ -65,10 +50,28 @@ public class EmaThreadPredictor implements ThreadManager {
         return false;
     }
 
-    private final double alpha;
-    private double lastPrediction = 0.0;
-    private double predictedTasks = 0.0;
-    private double rateOfChange = 0.0;
+    private void watcher() {
+        try {
+            while (true) {
+                Thread.sleep(WATCHER_RESOLUTION);
 
-    private List<AbstractMap.SimpleImmutableEntry<Long, Integer>> threadCounts;
+                int currentTasks = tasks.getAndSet(0);
+
+                double difference = currentTasks - movingAverage;
+                movingAverage = alpha * currentTasks + (1 - alpha) * movingAverage;
+                prediction = Math.max(movingAverage + difference, minThreads);
+            }
+        } catch(InterruptedException e) {}
+    }
+
+    private final Thread watcherThread;
+
+    private final double alpha;
+    private final int minThreads;
+    private double movingAverage = 0.0;
+    private double prediction = 0.0; // TODO: This needs to be atomic
+
+    private AtomicInteger tasks = new AtomicInteger(0);
+
+    private final static int WATCHER_RESOLUTION = 5;
 }

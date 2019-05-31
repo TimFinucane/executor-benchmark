@@ -3,6 +3,7 @@ package group16.executor.service;
 import group16.executor.service.task.management.FixedQueueTaskManager;
 import group16.executor.service.task.management.NonEmptyRoundRobinTaskManager;
 import group16.executor.service.task.management.TaskManager;
+import group16.executor.service.thread.management.EmaThreadPredictor;
 import group16.executor.service.thread.management.ThreadManager;
 import group16.executor.service.thread.management.WatermarkPredictor;
 
@@ -19,7 +20,7 @@ public class DynamicExecutorService extends AbstractExecutorService {
 
     public DynamicExecutorService() {
         this.taskManager = new FixedQueueTaskManager(4);
-        this.threadManager = new WatermarkPredictor(4, 8);
+        this.threadManager = new EmaThreadPredictor(0.7);// new WatermarkPredictor(4, 8);
 
         this.threads = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
@@ -27,22 +28,6 @@ public class DynamicExecutorService extends AbstractExecutorService {
             this.threads.add(new Thread(this::runThread));
             this.threads.get(i).start();
         }
-
-        // Set up watcher thread for counting tasks per time unit
-        // TODO: We should find a way of doing this in LocalMetrics or GlobalMetrics instead. (e.g. query service.numTasks() or something)
-        this.watcherThread = new Thread(() -> {
-            while(!shutdown.get()) {
-                // TODO: get executionsPerSample value and alter thread number appropriately
-                int threadNo = executionsPerSample.getAndSet(0);
-
-                try {
-                    Thread.sleep(sampleRate);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        this.watcherThread.start();
     }
 
     @Override
@@ -135,9 +120,6 @@ public class DynamicExecutorService extends AbstractExecutorService {
 
     // Contains all threads created, including those that are since exited.
     private List<Thread> threads;
-    private Thread watcherThread;
-
-    private int sampleRate;
 
     private AtomicInteger executionsPerSample = new AtomicInteger(0);
     private AtomicBoolean shutdown = new AtomicBoolean(false);
