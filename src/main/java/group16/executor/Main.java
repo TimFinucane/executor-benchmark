@@ -17,7 +17,7 @@ public class Main {
     public static void main(String[] args) {
 
         try {
-            Dispatcher dispatcher = new DynamicLoadProfile(1000, 100000, 20, 10).generate();
+            Dispatcher dispatcher = new DynamicLoadProfile(10000, 500000, 30, 1).generate();
             ExecutorService defaultService = new DynamicExecutorService(); // Executors.newFixedThreadPool(4);
             Metrics metrics = dispatcher.run(defaultService);
 
