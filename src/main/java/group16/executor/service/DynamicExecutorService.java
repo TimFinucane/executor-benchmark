@@ -20,7 +20,7 @@ public class DynamicExecutorService extends AbstractExecutorService {
 
     public DynamicExecutorService() {
         this.taskManager = new FixedQueueTaskManager(4);
-        this.threadManager = new EmaThreadPredictor(0.7);// new WatermarkPredictor(4, 8);
+        this.threadManager = new EmaThreadPredictor(0.7, shutdown);// new WatermarkPredictor(4, 8);
 
         this.threads = new ArrayList<>();
         for (int i = 0; i < 4; i++) {

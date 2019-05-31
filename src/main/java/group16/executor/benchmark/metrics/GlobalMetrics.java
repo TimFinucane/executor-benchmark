@@ -41,7 +41,7 @@ public class GlobalMetrics
                 globalDataSamples
             );
         }
-
+        int i = 0;
         private void runGatherMetricsThread() {
             try {
                 while (!shutdown) {

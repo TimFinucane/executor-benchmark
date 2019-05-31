@@ -2,6 +2,7 @@ package group16.executor.service.thread.management;
 
 import java.util.AbstractMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -12,17 +13,18 @@ public class EmaThreadPredictor implements ThreadManager {
      * @param alpha Weighting factor for exponential weighting reduction
      * @param minThreads Minimum number of threads
      */
-    public EmaThreadPredictor(double alpha, int minThreads) {
+    public EmaThreadPredictor(double alpha, int minThreads, AtomicBoolean shutdown) {
         this.alpha = alpha;
         this.minThreads = minThreads;
+        this.shutdown = shutdown;
 
         // TODO: How do we stop this?
         watcherThread = new Thread(this::watcher);
         watcherThread.start();
         prediction = minThreads;
     }
-    public EmaThreadPredictor(double alpha) {
-        this(alpha, 4);
+    public EmaThreadPredictor(double alpha, AtomicBoolean shutdown) {
+        this(alpha, 4, shutdown);
     }
 
     @Override
@@ -52,7 +54,7 @@ public class EmaThreadPredictor implements ThreadManager {
 
     private void watcher() {
         try {
-            while (true) {
+            while (!shutdown.get()) {
                 Thread.sleep(WATCHER_RESOLUTION);
 
                 int currentTasks = tasks.getAndSet(0);
@@ -68,10 +70,11 @@ public class EmaThreadPredictor implements ThreadManager {
 
     private final double alpha;
     private final int minThreads;
+    private AtomicBoolean shutdown;
     private double movingAverage = 0.0;
     private double prediction = 0.0; // TODO: This needs to be atomic
 
     private AtomicInteger tasks = new AtomicInteger(0);
 
-    private final static int WATCHER_RESOLUTION = 5;
+    private final static int WATCHER_RESOLUTION = 50;
 }
