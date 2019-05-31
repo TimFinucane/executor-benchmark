@@ -61,8 +61,8 @@ public class Main {
     static void printMetrics(Metrics metrics) {
         System.out.println("Running " + metrics.serviceType + " on " + metrics.profileType);
         System.out.println("\tTime to run: " + metrics.global.totalTime + "s");
-        System.out.println("\tAvg. request completion time: " + metrics.local.averageCompletionTime());
-        System.out.println("\tMax request completion time: " + metrics.local.maxCompletionTime());
-        System.out.println("\tAverage CPU load: " + metrics.global.averageCpuLoad());
+        System.out.println("\tAvg. request completion time: " + metrics.local.averageCompletionTime() + "s");
+        System.out.println("\tMax request completion time: " + metrics.local.maxCompletionTime() + "s");
+        System.out.println("\tAverage CPU load: " + metrics.global.averageCpuLoad() + "%");
     }
 }
