@@ -1,7 +1,6 @@
 package group16.executor.service;
 
 import group16.executor.service.task.management.FixedQueueTaskManager;
-import group16.executor.service.task.management.NonEmptyRoundRobinTaskManager;
 import group16.executor.service.task.management.TaskManager;
 import group16.executor.service.thread.management.EmaThreadPredictor;
 import group16.executor.service.thread.management.ThreadManager;
@@ -9,7 +8,6 @@ import group16.executor.service.thread.management.WatermarkPredictor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,13 +15,33 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class DynamicExecutorService extends AbstractExecutorService {
+    public static DynamicExecutorService fixedQueueWatermark() {
+        int cores = Runtime.getRuntime().availableProcessors();
 
-    public DynamicExecutorService() {
-        this.taskManager = new FixedQueueTaskManager(4);
-        this.threadManager = new EmaThreadPredictor(0.7, shutdown);// new WatermarkPredictor(4, 8);
+        return new DynamicExecutorService(
+            new FixedQueueTaskManager(cores),
+            new WatermarkPredictor(cores, cores * 2) // TODO: Try cores * 4, etc.
+        );
+    }
+    public static DynamicExecutorService fixedQueueEma() {
+        int cores = Runtime.getRuntime().availableProcessors();
+
+        EmaThreadPredictor emaThreadPredictor = new EmaThreadPredictor(0.7);
+
+        DynamicExecutorService service = new DynamicExecutorService(
+            new FixedQueueTaskManager(cores),
+            emaThreadPredictor
+        );
+        emaThreadPredictor.shutdownOn(service.shutdown);
+        return service;
+    }
+
+    public DynamicExecutorService(TaskManager taskManager, ThreadManager threadManager) {
+        this.taskManager = taskManager;
+        this.threadManager = threadManager;
 
         this.threads = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < this.threadManager.threadDeficit(0); i++) {
             activeThreads.incrementAndGet();
             this.threads.add(new Thread(this::runThread));
             this.threads.get(i).start();

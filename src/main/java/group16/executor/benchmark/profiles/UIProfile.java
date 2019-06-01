@@ -47,10 +47,10 @@ public class UIProfile extends Profile {
         for(int i = 0; i < tasks; ++i) {
             if(builder.chance(ratio)) { // UI task
                 double time = randomTime.sample();
-                dispatch.submit(builder.waiter(time));
+                dispatch.submit(ProfileBuilder.waiter(time));
             } else { // CPU Task
                 int accuracyValue = (int)Math.round(randomAccuracy.sample());
-                dispatch.submit(builder.calculator(accuracyValue));
+                dispatch.submit(ProfileBuilder.calculator(accuracyValue));
             }
         }
 

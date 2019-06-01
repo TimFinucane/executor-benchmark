@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -29,7 +30,7 @@ public abstract class Dispatcher {
      */
     public Dispatcher(int totalTasks) {
         this.totalTasks = totalTasks;
-        this.callableResults = new ArrayList<>();
+        this.callableResults = new double[totalTasks];
     }
 
     public Metrics run(ExecutorService service) {
@@ -53,9 +54,8 @@ public abstract class Dispatcher {
         // Stop gathering global metrics
         globalMetrics.finish();
 
-        System.out.println("Finished! An average value of " + // Actually use the output of the callables because Java
-                callableResults.stream().filter(Objects::nonNull).mapToDouble(v -> v).average().getAsDouble() +
-                " was calculated!");
+        System.out.println("Finished! Please ignore this value: " + // Actually use the output of the callables because Java
+            Arrays.stream(callableResults).average().orElse(-1.0));
 
         this.service = null;
 
@@ -78,7 +78,7 @@ public abstract class Dispatcher {
             try {
                 // Not locking the callableResults list is acceptable because we don't care about correctness and we
                 // don't want to impact performance
-                callableResults.add((double) callable.call());
+                callableResults[task] = (double) callable.call();
             } catch(Exception e) {
                 System.out.println("Callable threw an exception, clean it up: ");
                 e.printStackTrace();
@@ -93,7 +93,7 @@ public abstract class Dispatcher {
     // Next task index to be created. Does not indicate which tasks are completed.
     private AtomicInteger currentTask = new AtomicInteger(0);
     private LocalMetrics.Builder localMetrics;
-    private List<Double> callableResults;
+    private double[] callableResults;
 
     private ExecutorService service;
 }

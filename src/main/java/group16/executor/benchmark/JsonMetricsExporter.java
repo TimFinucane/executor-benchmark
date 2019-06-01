@@ -12,9 +12,9 @@ import java.util.Date;
 
 public class JsonMetricsExporter implements MetricsExporter {
     @Override
-    public void exportMetrics(Metrics metrics) {
+    public void exportMetrics(Metrics metrics, String serviceType, String profileType) {
         Gson gson = new Gson();
-        String fileName = metrics.serviceType + "-" + metrics.profileType + "-" +
+        String fileName = serviceType + "_" + profileType + "_" +
                 new SimpleDateFormat("yyy-MM-dd-HHmmss'.json'").format(new Date());
         File directory = new File(Paths.get(System.getProperty("user.dir"), "metrics").toString());
         if (! directory.exists()){

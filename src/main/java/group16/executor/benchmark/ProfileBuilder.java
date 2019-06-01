@@ -35,7 +35,7 @@ public class ProfileBuilder {
     public static Callable<?> waiter(double time) {
         return () -> {
             TimeUnit.MILLISECONDS.sleep((long)(time * 1000));
-            return 0;
+            return 0.0;
         };
     }
 

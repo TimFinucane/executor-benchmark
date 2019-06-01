@@ -13,18 +13,21 @@ public class EmaThreadPredictor implements ThreadManager {
      * @param alpha Weighting factor for exponential weighting reduction
      * @param minThreads Minimum number of threads
      */
-    public EmaThreadPredictor(double alpha, int minThreads, AtomicBoolean shutdown) {
+    public EmaThreadPredictor(double alpha, int minThreads) {
         this.alpha = alpha;
         this.minThreads = minThreads;
-        this.shutdown = shutdown;
 
         // TODO: How do we stop this?
         watcherThread = new Thread(this::watcher);
         watcherThread.start();
         prediction = minThreads;
     }
-    public EmaThreadPredictor(double alpha, AtomicBoolean shutdown) {
-        this(alpha, 4, shutdown);
+    public EmaThreadPredictor(double alpha) {
+        this(alpha, 4);
+    }
+
+    public void shutdownOn(AtomicBoolean shutdown) {
+        this.shutdown = shutdown;
     }
 
     @Override
@@ -70,7 +73,7 @@ public class EmaThreadPredictor implements ThreadManager {
 
     private final double alpha;
     private final int minThreads;
-    private AtomicBoolean shutdown;
+    private AtomicBoolean shutdown = new AtomicBoolean(false);
     private double movingAverage = 0.0;
     private double prediction = 0.0; // TODO: This needs to be atomic
 

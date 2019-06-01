@@ -4,6 +4,6 @@ import group16.executor.benchmark.metrics.Metrics;
 
 public interface MetricsExporter {
 
-    void exportMetrics(Metrics metrics);
+    void exportMetrics(Metrics metrics, String serviceType, String profileType);
 
 }

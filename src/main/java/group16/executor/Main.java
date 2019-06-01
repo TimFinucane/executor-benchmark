@@ -2,64 +2,89 @@ package group16.executor;
 
 import group16.executor.benchmark.JsonMetricsExporter;
 import group16.executor.benchmark.MetricsExporter;
+import group16.executor.benchmark.Profile;
 import group16.executor.benchmark.ProfileBuilder;
 import group16.executor.benchmark.helpers.Dispatcher;
 import group16.executor.benchmark.metrics.Metrics;
 import group16.executor.benchmark.profiles.DynamicLoadProfile;
+import group16.executor.benchmark.profiles.UIProfile;
 import group16.executor.benchmark.profiles.UniformProfile;
 import group16.executor.service.DynamicExecutorService;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Main {
     public static void main(String[] args) {
+        final int attempts = 1;
 
-        try {
-            Dispatcher dispatcher = new DynamicLoadProfile(10000, 500000, 30, 1).generate();
-            ExecutorService defaultService = new DynamicExecutorService(); // Executors.newFixedThreadPool(4);
-            Metrics metrics = dispatcher.run(defaultService);
+        Profile[] profiles = new Profile[] {
+            new UniformProfile(10000, 100000, 5),
+            new DynamicLoadProfile(100000, 40000, 10, 10),
+            new UIProfile(10000, 0.1, 100000, 0.1),
+            new UniformProfile(70000, 500000),
+        };
+        String[] profileNames = new String[] {
+            "UniformProfile-DynamicLoad",
+            "DynamicProfile-ManyTasks-10Peaks",
+            "UIProfile",
+            "UniformProfile-HeavyTasks-StaticLoad"
+        };
 
-            // Export the metrics
-            metrics.profileType = "UniformProfile";
-            metrics.serviceType = "FixedThreadPool";
-            MetricsExporter exporter = new JsonMetricsExporter();
-            exporter.exportMetrics(metrics);
+        String[] serviceNames = getExecutorServiceNames();
 
-            // Print metrics info
-            printMetrics(metrics);
+        MetricsExporter exporter = new JsonMetricsExporter();
 
-//            for(int i = 0; i < 10; ++i) {
-//                ExecutorService defaultService = Executors.newFixedThreadPool(4);
-//                ExecutorService ourService = new DynamicExecutorService();
-//
-//                System.out.println("Fixed thread pool:");
-//                Metrics metrics = dispatcher.run(defaultService);
-//
-//                System.out.println("\tTime to run: " + metrics.global.totalTime + "s");
-//                System.out.println("\tAvg. request completion time: " + metrics.local.averageCompletionTime());
-//                System.out.println("\tMax request completion time: " + metrics.local.maxCompletionTime());
-//                System.out.println("\tAverage CPU load: " + metrics.global.averageCpuLoad());
-//
-//                MetricsExporter exporter = new JsonMetricsExporter();
-//                exporter.exportMetrics(metrics);
-//
-//                System.out.println("Our service:");
-//                metrics = dispatcher.run(ourService);
-//
-//                System.out.println("\tTime to run: " + metrics.global.totalTime + "s");
-//                System.out.println("\tAvg. request completion time: " + metrics.local.averageCompletionTime());
-//                System.out.println("\tMax request completion time: " + metrics.local.maxCompletionTime());
-//                System.out.println("\tAverage CPU load: " + metrics.global.averageCpuLoad());
-//            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        // Perform a warm-up, discard the results (as the JVM will be unstable)
+        new UniformProfile(100000, 100000).generate().run(Executors.newFixedThreadPool(8));
+
+        for(int profileIndex = 0; profileIndex < profiles.length; ++profileIndex) {
+            Profile profile = profiles[profileIndex];
+            String profileName = profileNames[profileIndex];
+
+            for(int attempt = 0; attempt < attempts; ++attempt) {
+                Dispatcher dispatcher = profile.generate();
+                // Get it here as we need a fresh executor service every time.
+                ExecutorService[] services = getExecutorServices();
+
+                for(int serviceIndex = 0; serviceIndex < services.length; ++serviceIndex) {
+                    ExecutorService service = services[serviceIndex];
+                    String serviceName = serviceNames[serviceIndex];
+
+                    Metrics metrics = dispatcher.run(service);
+
+                    exporter.exportMetrics(metrics, serviceName, profileName);
+                    printMetrics(metrics, serviceName, profileName);
+                }
+            }
         }
     }
 
-    static void printMetrics(Metrics metrics) {
-        System.out.println("Running " + metrics.serviceType + " on " + metrics.profileType);
+    static ExecutorService[] getExecutorServices() {
+        int cores = Runtime.getRuntime().availableProcessors();
+
+        return new ExecutorService[] {
+            DynamicExecutorService.fixedQueueWatermark(),
+            DynamicExecutorService.fixedQueueEma(),
+            Executors.newFixedThreadPool(cores),
+            new ForkJoinPool(),
+            Executors.newWorkStealingPool(),
+        };
+    }
+    static String[] getExecutorServiceNames() {
+        return new String[] {
+            "Group16Service-Watermark",
+            "Group16Service-Ema",
+            "FixedThreadPool",
+            "ForkJoinPool",
+            "WorkStealingPool",
+        };
+    }
+
+    static void printMetrics(Metrics metrics, String serviceType, String profileType) {
+        System.out.println("Running " + serviceType + " on " + profileType);
         System.out.println("\tTime to run: " + metrics.global.totalTime + "s");
         System.out.println("\tAvg. request completion time: " + metrics.local.averageCompletionTime() + "s");
         System.out.println("\tMax request completion time: " + metrics.local.maxCompletionTime() + "s");

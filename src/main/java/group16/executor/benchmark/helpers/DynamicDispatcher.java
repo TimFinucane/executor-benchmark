@@ -29,8 +29,6 @@ public class DynamicDispatcher extends Dispatcher {
     }
 
     protected void dispatchAllAndWait() {
-        // TODO: Debug, remove when not needed any longer.
-        System.out.println("TOTAL TIME SHOULD BE " + this.tasks.get(this.tasks.size() - 1).getFirst());
 
         // Our specific adjustment to try and anticipate lags
         double predictedLag = 0.0;
