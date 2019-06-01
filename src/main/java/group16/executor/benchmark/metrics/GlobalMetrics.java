@@ -41,7 +41,7 @@ public class GlobalMetrics
                 globalDataSamples
             );
         }
-        int i = 0;
+
         private void runGatherMetricsThread() {
             try {
                 while (!shutdown) {
@@ -55,6 +55,7 @@ public class GlobalMetrics
         }
 
         private void runResponsivenessThread() {
+            timeSinceLastResponsivenessCall = System.currentTimeMillis();
             while (!shutdown) {
                 try {
                     ProfileBuilder.calculator(RESPONSIVENESS_THREAD_WORKLOAD).call();
@@ -83,7 +84,11 @@ public class GlobalMetrics
             double cpuLoad = osBean.getProcessCpuLoad() * 100.0;
             ThreadMXBean osBean = ManagementFactory.getThreadMXBean();
             int threadCount = osBean.getThreadCount();
-            globalDataSamples.add(new GlobalDataSample(systemTime, cpuLoad, threadCount, responsiveWorkDone.getAndSet(0)));
+            // Scale the responsive work done by work done per sample period
+            int responsiveWorkDoneInLastTimeUnit = (int)(responsiveWorkDone.getAndSet(0) /
+                    ((System.currentTimeMillis() - timeSinceLastResponsivenessCall) / (double)RESOLUTION));
+            globalDataSamples.add(new GlobalDataSample(systemTime, cpuLoad, threadCount, responsiveWorkDoneInLastTimeUnit));
+            timeSinceLastResponsivenessCall = System.currentTimeMillis();
         }
 
         // Wait time in ms between getting measurements
@@ -93,6 +98,7 @@ public class GlobalMetrics
 
         private boolean shutdown = false;
 
+        private long timeSinceLastResponsivenessCall = 0;
         private long totalTime;
         private ArrayList<GlobalDataSample> globalDataSamples = new ArrayList<>();
         private AtomicInteger responsiveWorkDone = new AtomicInteger(0); // Fine to have atomic here as contention will be very low

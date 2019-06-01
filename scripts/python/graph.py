@@ -52,10 +52,9 @@ def create_metrics_graphs(metrics_set):
         thread_counts = [g['threadCount'] for g in global_metrics['globalDataSamples']]
         responsiveness = [g['responsiveWorkCompleted'] for g in global_metrics['globalDataSamples']]
 
-        print(thread_counts)
         graph(sample_times, cpu_loads, 'Sample Time (seconds)', 'CPU Load (%)')
         graph(sample_times, thread_counts, 'Sample Time (seconds)', 'Thread Count')
-        graph(sample_times, responsiveness, 'Sample Time (seconds)', 'Responsiveness')
+        graph(sample_times, responsiveness, 'Sample Time (seconds)', 'Tasks completed in Responsiveness thread per 500 millis')
 
         legend.append(metrics['serviceType'] + ' ' + metrics['profileType'])
 
