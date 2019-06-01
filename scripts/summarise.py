@@ -57,6 +57,7 @@ profile_display_names = {
     'IOProfile': 'IO',
     'UniformProfile-DynamicLoad': 'Uniform',
     'UniformProfile-HeavyTasks-StaticLoad': 'Static',
+    'IrregularProfile': 'Irregular'
 }
 result_types = [
     'mean completion time',

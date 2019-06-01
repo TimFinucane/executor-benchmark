@@ -7,6 +7,7 @@ import group16.executor.benchmark.helpers.Dispatcher;
 import group16.executor.benchmark.metrics.Metrics;
 import group16.executor.benchmark.profiles.DynamicLoadProfile;
 import group16.executor.benchmark.profiles.IOProfile;
+import group16.executor.benchmark.profiles.IrregularProfile;
 import group16.executor.benchmark.profiles.UniformProfile;
 import group16.executor.service.DynamicExecutorService;
 
@@ -26,6 +27,8 @@ public class Main {
             new DynamicLoadProfile(100000, 45000, 5, 10),
             // Few tasks, but the IO blocking tasks will confuse most systems.
             new IOProfile(6000, 0.2, 100000, 0.03),
+            // Few tasks, hopefully to show some unbalanced loading
+            new IrregularProfile(10000, 500000, 200000),
             // Let it rip. All tasks come in at same time.
             new UniformProfile(20000, 500000),
         };
@@ -33,6 +36,7 @@ public class Main {
             "UniformProfile-DynamicLoad",
             "DynamicProfile-ManyTasks-10Peaks",
             "IOProfile",
+            "IrregularProfile",
             "UniformProfile-HeavyTasks-StaticLoad"
         };
 
