@@ -1,6 +1,7 @@
 package group16.executor.service;
 
 import group16.executor.service.task.management.FixedQueueTaskManager;
+import group16.executor.service.task.management.SharedTaskManager;
 import group16.executor.service.task.management.TaskManager;
 import group16.executor.service.thread.management.EmaThreadPredictor;
 import group16.executor.service.thread.management.ThreadManager;
@@ -15,6 +16,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class DynamicExecutorService extends AbstractExecutorService {
+    // Default Dynamic executor service creator methods
     public static DynamicExecutorService fixedQueueWatermark() {
         int cores = Runtime.getRuntime().availableProcessors();
 
@@ -31,6 +33,24 @@ public class DynamicExecutorService extends AbstractExecutorService {
         DynamicExecutorService service = new DynamicExecutorService(
             new FixedQueueTaskManager(cores),
             emaThreadPredictor
+        );
+        emaThreadPredictor.shutdownOn(service.shutdown);
+        return service;
+    }
+    public static DynamicExecutorService sharedQueueWatermark() {
+        int cores = Runtime.getRuntime().availableProcessors();
+
+        return new DynamicExecutorService(
+                new SharedTaskManager(),
+                new WatermarkPredictor(cores, cores * 2)
+        );
+    }
+    public static  DynamicExecutorService sharedQueueEma() {
+        EmaThreadPredictor emaThreadPredictor = new EmaThreadPredictor(0.7);
+
+        DynamicExecutorService service = new DynamicExecutorService(
+                new SharedTaskManager(),
+                emaThreadPredictor
         );
         emaThreadPredictor.shutdownOn(service.shutdown);
         return service;

@@ -68,6 +68,8 @@ public class Main {
         return new ExecutorService[] {
             DynamicExecutorService.fixedQueueWatermark(),
             DynamicExecutorService.fixedQueueEma(),
+            DynamicExecutorService.sharedQueueWatermark(),
+            DynamicExecutorService.sharedQueueEma(),
             Executors.newFixedThreadPool(cores),
             new ForkJoinPool(),
             Executors.newWorkStealingPool(),
@@ -75,8 +77,10 @@ public class Main {
     }
     static String[] getExecutorServiceNames() {
         return new String[] {
-            "Group16Service-Watermark",
-            "Group16Service-Ema",
+            "Group16Service-FixedQueue-Watermark",
+            "Group16Service-FixedQueue-Ema",
+            "Group16Service-SharedQueue-Watermark",
+            "Group16Service-SharedQueue-Ema",
             "FixedThreadPool",
             "ForkJoinPool",
             "WorkStealingPool",
