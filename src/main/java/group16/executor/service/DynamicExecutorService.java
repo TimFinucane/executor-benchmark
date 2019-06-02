@@ -106,7 +106,6 @@ public class DynamicExecutorService extends AbstractExecutorService {
         if(!shutdown.get()) {
             threadManager.taskAdded();
             taskManager.addTask(command);
-            executionsPerSample.incrementAndGet();
 
             if(threadManager.threadDeficit(activeThreads.get()) > 0) {
                 activeThreads.incrementAndGet();
@@ -159,7 +158,6 @@ public class DynamicExecutorService extends AbstractExecutorService {
     // Contains all threads created, including those that are since exited.
     private List<Thread> threads;
 
-    private AtomicInteger executionsPerSample = new AtomicInteger(0);
     private AtomicBoolean shutdown = new AtomicBoolean(false);
     private AtomicInteger activeThreads = new AtomicInteger(0);
 
