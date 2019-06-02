@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * This profile submits halting tasks (involving a lot of waiting), and cpu intensive tasks
  */
-public class UIProfile extends Profile {
+public class IOProfile extends Profile {
     /**
      *
      * @param tasks Total number of tasks
@@ -21,7 +21,7 @@ public class UIProfile extends Profile {
      * @param uiTaskTime Blocking time of a ui thread
      * @return
      */
-    public UIProfile(int tasks, double ratio, int cpuTaskSize, double uiTaskTime) {
+    public IOProfile(int tasks, double ratio, int cpuTaskSize, double uiTaskTime) {
         this.tasks = tasks;
         this.ratio = ratio;
         this.cpuTaskSize = cpuTaskSize;

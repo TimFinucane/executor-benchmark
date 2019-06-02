@@ -3,33 +3,36 @@ package group16.executor;
 import group16.executor.benchmark.JsonMetricsExporter;
 import group16.executor.benchmark.MetricsExporter;
 import group16.executor.benchmark.Profile;
-import group16.executor.benchmark.ProfileBuilder;
 import group16.executor.benchmark.helpers.Dispatcher;
 import group16.executor.benchmark.metrics.Metrics;
 import group16.executor.benchmark.profiles.DynamicLoadProfile;
-import group16.executor.benchmark.profiles.UIProfile;
+import group16.executor.benchmark.profiles.IOProfile;
 import group16.executor.benchmark.profiles.UniformProfile;
 import group16.executor.service.DynamicExecutorService;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Main {
     public static void main(String[] args) {
         final int attempts = 1;
 
         Profile[] profiles = new Profile[] {
-            new UniformProfile(10000, 100000, 5),
-            new DynamicLoadProfile(100000, 40000, 10, 10),
-            new UIProfile(10000, 0.1, 100000, 0.1),
-            new UniformProfile(70000, 500000),
+            // Few tasks, relatively beefy, should be a BREEZE for the services. Should take ~5s.
+            new UniformProfile(30000, 100000, 5),
+            // Few tasks, but lots of them. Tasks coming in waves should put even more stress on the system.
+            // Should take ~6s per run
+            new DynamicLoadProfile(100000, 45000, 5, 10),
+            // Few tasks, but the IO blocking tasks will confuse most systems.
+            new IOProfile(6000, 0.1, 100000, 0.1),
+            // Let it rip. All tasks come in at same time.
+            new UniformProfile(20000, 500000),
         };
         String[] profileNames = new String[] {
             "UniformProfile-DynamicLoad",
             "DynamicProfile-ManyTasks-10Peaks",
-            "UIProfile",
+            "IOProfile",
             "UniformProfile-HeavyTasks-StaticLoad"
         };
 
