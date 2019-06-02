@@ -54,7 +54,7 @@ for filename in os.listdir(folder):
 # Now make the graphs
 profile_display_names = {
     'DynamicProfile-ManyTasks-10Peaks': 'Peaked',
-    'UIProfile': 'UI',
+    'IOProfile': 'IO',
     'UniformProfile-DynamicLoad': 'Uniform',
     'UniformProfile-HeavyTasks-StaticLoad': 'Static',
 }

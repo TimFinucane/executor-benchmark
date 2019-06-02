@@ -22,10 +22,10 @@ public class Main {
             // Few tasks, relatively beefy, should be a BREEZE for the services. Should take ~5s.
             new UniformProfile(30000, 100000, 5),
             // Few tasks, but lots of them. Tasks coming in waves should put even more stress on the system.
-            // Should take ~6s per run
+            // Should take 6-7s per run (because the backlog fills up)
             new DynamicLoadProfile(100000, 45000, 5, 10),
             // Few tasks, but the IO blocking tasks will confuse most systems.
-            new IOProfile(6000, 0.1, 100000, 0.1),
+            new IOProfile(6000, 0.2, 100000, 0.03),
             // Let it rip. All tasks come in at same time.
             new UniformProfile(20000, 500000),
         };
