@@ -67,7 +67,7 @@ result_types = [
 
 for i in range(len(result_types)):
     data = pd.DataFrame([
-        [profile_display_names[profile], service, results[profile][service][i] / np.mean([service[i] for service in results[profile].values()])]
+        [profile_display_names[profile], service, results[profile][service][i] / (np.mean([service[i] for service in results[profile].values()]) if i < 2 else 1)]
         for profile in results
         for service in results[profile]],
         columns=['profile', 'service', 'value']

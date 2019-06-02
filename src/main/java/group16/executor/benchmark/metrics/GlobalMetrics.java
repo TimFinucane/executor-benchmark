@@ -92,7 +92,7 @@ public class GlobalMetrics
         }
 
         // Wait time in ms between getting measurements
-        private static final long RESOLUTION = 500;
+        private static final long RESOLUTION = 200;
         private static final int RESPONSIVENESS_THREAD_WORKLOAD = 100000;
         private static final OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
 
