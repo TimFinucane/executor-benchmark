@@ -48,8 +48,8 @@ for filename in os.listdir(folder):
         with open(os.path.join(folder, summary_filename), 'w', encoding='utf-8') as summary_file:
             summary_file.write('mean completion time - {:010.7f}\n'.format(mean_completion_time))
             summary_file.write('max completion time  - {:010.7f}\n'.format(max_completion_time))
-            summary_file.write('mean cpu usage       - {:04.2f}\n'.format(mean_cpu_usage))
-            summary_file.write('responsiveness std   - {:.3E}\n'.format(responsiveness_std))
+            summary_file.write('mean cpu usage       - {:05.2f}\n'.format(mean_cpu_usage))
+            summary_file.write('responsiveness std   - {:05.1f}\n'.format(responsiveness_std))
 
 # Now make the graphs
 profile_display_names = {
@@ -65,6 +65,22 @@ result_types = [
     'mean cpu usage',
     'responsiveness (std)'
 ]
+
+# Write table:
+for i in range(len(result_types)):
+    table_name = "TABLE_" + result_types[i].replace(' ', '-').replace('(', '').replace(')', '') + "_table"
+
+    with open(os.path.join(folder, table_name + ".txt"), 'w', encoding='utf-8') as table_file:
+        services = sorted(list(set([service for profile in results for service in results[profile]])))
+        
+        table_file.write("profile, " + ", ".join(services) + "\n" + 
+            "\n".join(["{:9s}".format(profile_display_names[profile]) + ", " +
+                ", ".join([("{:" + ("07.4f" if i < 2 else "5.2f" if i == 2 else "5.1f") + "}").format(
+                    results[profile][service][i] / (np.mean([service[i] for service in results[profile].values()]) if i < 2 else 1)) for service in sorted(results[profile])])
+                for profile in results
+            ])
+        )
+
 
 for i in range(len(result_types)):
     data = pd.DataFrame([
