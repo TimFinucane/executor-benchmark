@@ -28,7 +28,7 @@ public class Main {
             // Few tasks, but the IO blocking tasks will confuse most systems.
             new IOProfile(6000, 0.2, 100000, 0.03),
             // Few tasks, hopefully to show some unbalanced loading
-            new IrregularProfile(10000, 500000, 200000),
+            new IrregularProfile(10000, 50000, 20000),
             // Let it rip. All tasks come in at same time.
             new UniformProfile(20000, 500000),
         };
