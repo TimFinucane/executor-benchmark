@@ -6,8 +6,8 @@ import group16.executor.benchmark.ProfileBuilder;
 
 import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -52,13 +52,15 @@ public class GlobalMetrics
                 System.out.println("Exception thrown while sleeping between metrics gathering period");
                 e.printStackTrace();
             }
+            // Ensure responsiveness thread values are used to prevent JIT optimizations
+            System.out.println("Please ignore this value also: " + responsiveThreadResults.stream().mapToDouble(v -> v).average().getAsDouble());
         }
 
         private void runResponsivenessThread() {
-            timeSinceLastResponsivenessCall = System.currentTimeMillis();
+            timeOfLastResponsivenessCall = System.currentTimeMillis();
             while (!shutdown) {
                 try {
-                    ProfileBuilder.calculator(RESPONSIVENESS_THREAD_WORKLOAD).call();
+                    responsiveThreadResults.add((Double) ProfileBuilder.calculator(RESPONSIVENESS_THREAD_WORKLOAD).call());
                 } catch (Exception e) {
                     System.out.println("Exception thrown while running responsiveness thread work simulation");
                     e.printStackTrace();
@@ -86,9 +88,9 @@ public class GlobalMetrics
             int threadCount = osBean.getThreadCount();
             // Scale the responsive work done by work done per sample period
             int responsiveWorkDoneInLastTimeUnit = (int)(responsiveWorkDone.getAndSet(0) /
-                    ((System.currentTimeMillis() - timeSinceLastResponsivenessCall) / (double)RESOLUTION));
+                    ((System.currentTimeMillis() - timeOfLastResponsivenessCall) / (double)RESOLUTION));
             globalDataSamples.add(new GlobalDataSample(systemTime, cpuLoad, threadCount, responsiveWorkDoneInLastTimeUnit));
-            timeSinceLastResponsivenessCall = System.currentTimeMillis();
+            timeOfLastResponsivenessCall = System.currentTimeMillis();
         }
 
         // Wait time in ms between getting measurements
@@ -98,10 +100,11 @@ public class GlobalMetrics
 
         private boolean shutdown = false;
 
-        private long timeSinceLastResponsivenessCall = 0;
+        private long timeOfLastResponsivenessCall = 0;
         private long totalTime;
         private ArrayList<GlobalDataSample> globalDataSamples = new ArrayList<>();
         private AtomicInteger responsiveWorkDone = new AtomicInteger(0); // Fine to have atomic here as contention will be very low
+        private List<Double> responsiveThreadResults = new ArrayList<>(); // needed to prevent JIT optimizations
     }
 
 
